@@ -104,7 +104,7 @@ class OrderManagementController extends Controller
                     'store_id'      => $storeId,
                     'quantity'      => $item->quantity,
                     'prix'          => $item->price,
-                    'prixTotal'     => $item->quantity * $item->price,
+                    'prixtotal'     => $item->quantity * $item->price,
                     'interet'       => $interet,
                 ]);
                 $totalQuantity += $item->quantity;

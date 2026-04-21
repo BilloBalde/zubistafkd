@@ -18,7 +18,7 @@ class Sale extends Model
         'store_id',
         'quantity',
         'prix',
-        'prixTotal',
+        'prixtotal',
         'interet',
     ];
 
