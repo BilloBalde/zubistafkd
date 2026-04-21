@@ -101,7 +101,7 @@
                                             </td>
                                             <td>{{ $data->quantity }}</td>
                                             <td>{{ number_format($data->prix, 0, ',', ' ') }} GNF</td>
-                                            <td>{{ number_format($data->prixtotal, 0, ',', ' ') }} GNF</td>
+                                            <td>{{ number_format($data->prixTotal, 0, ',', ' ') }} GNF</td>
                                             <td>{{ number_format($data->interet, 0, ',', ' ') }} GNF</td>
                                             <td>{{ $data->created_at }}</td>
                                             <td class="text-end">

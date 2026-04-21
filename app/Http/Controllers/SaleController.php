@@ -146,7 +146,7 @@ public function store(Request $request)
         $store = Store::findOrFail($request->store_id);
 
         foreach ($salesData as $data) {
-            $data["prixtotal"] = $data['prix'] * $data['quantity'];
+            $data["prixTotal"] = $data['prix'] * $data['quantity'];
             DB::table('store_products')
                 ->where('store_id', $request->store_id)
                 ->where('product_id', $data['product_id'])
@@ -156,14 +156,14 @@ public function store(Request $request)
             $prix_achat   = $lastPurchase ? $lastPurchase->price : 0;
             $data["interet"] = ($data['prix'] - $prix_achat) * $data['quantity'];
             $total_quantity += $data['quantity'];
-            $total_price    += $data['prixtotal'];
+            $total_price    += $data['prixTotal'];
 
             Sale::create([
                 'numeroFacture' => $request->numeroFacture,
                 'product_id'    => $data['product_id'],
                 'prix'          => $data['prix'],
                 'quantity'      => $data['quantity'],
-                'prixtotal'     => $data['prixtotal'],
+                'prixTotal'     => $data['prixTotal'],
                 'interet'       => $data['interet'],
                 'store_id'      => $request->store_id,
             ]);
@@ -298,7 +298,7 @@ public function store(Request $request)
             $prixAchat     = Purchase::where('product_id', $sale->product_id)->first()?->price ?? 0;
             $sale->prix    = $request->prix;
             $sale->quantity  = $request->quantity;
-            $sale->prixtotal = $request->quantity * $request->prix;
+            $sale->prixTotal = $request->quantity * $request->prix;
             $sale->interet   = ($request->prix - $prixAchat) * $request->quantity;
             $sale->save();
 

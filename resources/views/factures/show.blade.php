@@ -112,7 +112,7 @@
                                                 {{ number_format($item->prix, 0, ',', ' ') }} GNF
                                             </td>
                                             <td style="padding: 10px;vertical-align: top; ">
-                                                {{ number_format($item->prixtotal, 0, ',', ' ') }} GNF
+                                                {{ number_format($item->prixTotal, 0, ',', ' ') }} GNF
                                             </td>
                                         </tr>
                                         @endforeach

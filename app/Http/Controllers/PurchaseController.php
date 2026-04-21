@@ -90,16 +90,10 @@ public function store(Request $request)
 
         Purchase::create($data);
 
-        StoreProduct::updateOrCreate(
-            [
-                'store_id' => $data['store_id'],
-                'product_id' => $data['product_id'],
-            ],
-            [
-                // ✅ incrément safe (pas de raw injection)
-                'quantity' => DB::raw('quantity + ' . (int) $data['quantity']),
-            ]
-        );
+        StoreProduct::firstOrCreate(
+            ['store_id' => $data['store_id'], 'product_id' => $data['product_id']],
+            ['quantity' => 0]
+        )->increment('quantity', (int) $data['quantity']);
     }
 
     return redirect()->route('purchases.index')

@@ -420,7 +420,7 @@
                             </td>
                             <td>{{ $item->quantity }}</td>
                             <td>{{ numberDelimiter($item->price) }} GNF</td>
-                            <td>{{ numberDelimiter($item->prixtotal) }} GNF</td>
+                            <td>{{ numberDelimiter($item->prixTotal) }} GNF</td>
                             <td>{{ $item->updated_at }} GNF</td>
                         </tr>
                         @endforeach
