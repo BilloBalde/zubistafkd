@@ -23,9 +23,25 @@ use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
-use App\Http\Controllers\SliderController;
 use App\Http\Controllers\VisitController;
+// --- E-COMMERCE ROUTES ---
+use App\Http\Controllers\Ecommerce\AuthOtpController;
+use App\Http\Controllers\Ecommerce\AddressController;
+use App\Http\Controllers\Ecommerce\OrderController;
+use App\Http\Controllers\Ecommerce\CartController;
 
+use App\Http\Controllers\FactureController;
+use App\Http\Controllers\LogisticController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\SaleController;
+
+use App\Exports\ProductsExport;
+use App\Exports\PurchasesExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Http\Controllers\PhoneAuthController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -45,12 +61,6 @@ Route::get('/home', [IndexController::class, 'index'])->middleware('auth.check')
 
 
 Route::get('/beauty', [VisitController::class, 'index']);
-
-
-Route::get('/', function () {
-    $categories = Category::all();
-    return view('visitor.welcome', compact('categories'), ['pageName' => 'index-page']);
-})->name('accueil');
 
 Route::post('/send-verification-code', [PhoneAuthController::class, 'sendCode'])->name('send.code');
 Route::post('/verify-and-login', [PhoneAuthController::class, 'verifyAndLogin'])->name('verify.login');
@@ -87,40 +97,41 @@ Route::post('/sendEmail', [Authentification::class, 'sendEmail'])->name('sendEma
 Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 Route::get('/emailSetting', [EmailController::class, 'index'])->name('emailSetting');
 
-// --- E-COMMERCE ROUTES ---
-use App\Http\Controllers\Ecommerce\AuthOtpController;
-use App\Http\Controllers\Ecommerce\AddressController;
-use App\Http\Controllers\Ecommerce\OrderController;
-use App\Http\Controllers\Ecommerce\CartController;
+
+Route::get('/panier', [CartController::class, 'show'])->name('panier');
+Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+Route::get('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 
 Route::prefix('shop')->group(function () {
-    // Auth
     Route::get('/register', [AuthOtpController::class, 'showRegister'])->name('otp.register');
-    // ... rest of routes ...
+    Route::post('/register', [AuthOtpController::class, 'register'])->name('otp.register_submit');
+    Route::get('/login', [AuthOtpController::class, 'showLogin'])->name('otp.login');
+    Route::post('/login', [AuthOtpController::class, 'login'])->name('otp.login_submit');
+    Route::get('/verify', [AuthOtpController::class, 'showVerify'])->name('otp.verify');
     Route::post('/verify-otp', [AuthOtpController::class, 'verify'])->name('otp.verify_submit');
     Route::post('/logout', [AuthOtpController::class, 'logout'])->name('shop.logout');
 
-    // Panier (Accessible par tous)
-    Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
-    Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
-    Route::get('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
-
-    // Protected Routes
-    Route::middleware('auth')->group(function () {
-        // Addresses
+    Route::middleware(['auth', 'customer'])->group(function () {
+        Route::get('/', [VisitController::class, 'shop'])->name('shop.home');
         Route::get('/addresses', [AddressController::class, 'index'])->name('addresses.index');
         Route::get('/addresses/create', [AddressController::class, 'create'])->name('addresses.create');
         Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
         Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('addresses.destroy');
-
-        // Checkout & Orders
         Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
         Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     });
 });
-// -------------------------
+
+
+// routes/web.php
+Route::middleware(['auth', 'superuser'])->prefix('admin')->group(function () {
+    Route::get('/orders', [App\Http\Controllers\Admin\OrderManagementController::class, 'index'])->name('admin.orders.index');
+    Route::get('/orders/confirmed', [App\Http\Controllers\Admin\OrderManagementController::class, 'confirmed'])->name('admin.orders.confirmed');
+    Route::post('/orders/{order}/approve', [App\Http\Controllers\Admin\OrderManagementController::class, 'approve'])->name('admin.orders.approve');
+    Route::post('/orders/{order}/reject', [App\Http\Controllers\Admin\OrderManagementController::class, 'reject'])->name('admin.orders.reject');
+});
 
 Route::post('/profileImage', [ProfileController::class, 'profileImage'])->name('profileImage');
 Route::post('/profileInfo', [ProfileController::class, 'profileInfo'])->name('profileInfo');
@@ -135,7 +146,6 @@ Route::get('/createplace', [PlaceController::class, 'create'])->name('places.cre
 Route::post('/createplace', [PlaceController::class, 'store'])->name('places.store');
 Route::delete('/places/{id}', [PlaceController::class, 'destroy'])->name('places.destroy');
 Route::put('/updateplace/{place}', [PlaceController::class, 'update'])->name('places.update');
-Route::resource('roles', RoleController::class);
 Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
 Route::get('/createcustomer', [CustomerController::class, 'create'])->name('customers.create');
 Route::post('/createcustomer', [CustomerController::class, 'store'])->name('customers.store');
@@ -144,13 +154,6 @@ Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name
 Route::resource('boutiques', StoreController::class);
 Route::resource('expensesCategory', ExpenseCategoryController::class);
 Route::resource('expenses', ExpenseController::class);
-
-use App\Http\Controllers\FactureController;
-use App\Http\Controllers\LogisticController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\PurchaseController;
-use App\Http\Controllers\SaleController;
 
 Route::resource('categories', CategoryController::class);
 Route::resource('produits', ProductController::class);
@@ -164,11 +167,7 @@ Route::resource('payments', PaymentController::class);
 Route::get('/facture/payment/{id}', [PaymentController::class, 'creation'])->name('payments.creation');
 Route::get('/facture/voirPayment/{id}', [PaymentController::class, 'voir'])->name('payments.voir');
 
-use App\Exports\ProductsExport;
-use App\Exports\PurchasesExport;
-use Maatwebsite\Excel\Facades\Excel;
-use Barryvdh\DomPDF\Facade\Pdf;
-use App\Http\Controllers\PhoneAuthController;
+
 
 
 Route::get('/products/export-excel', function () {

@@ -155,8 +155,8 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <td>{{ $data->price }}</td>
-                                            <td>{{ $data->price_ctn }}</td>
+                                            <td>{{ number_format($data->price, 0, ',', ' ') }} GNF</td>
+                                            <td>{{ number_format($data->price_ctn, 0, ',', ' ') }} GNF</td>
                                             <td>{{ $data->quantity }}</td>
                                             <td>{{ $data->description }}</td>
                                             <td>{{ $data->created_at }}</td>

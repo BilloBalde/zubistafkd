@@ -99,7 +99,6 @@ class SaleController extends Controller
     public function ajout($numero_facture, $avance, $store_id)
     {
         $produits = Product::all();
-        //dd($numero_facture);
         return view('sales.create', compact('numero_facture', 'produits', 'avance', 'store_id'));
     }
 
@@ -141,81 +140,81 @@ public function store(Request $request)
     if (($request->final_total - $request->avance) < 0) {
         return redirect()->back()->with('error', 'Le montant de la commande est supérieur à la somme des avances, impossible donc de valider cette vente')->withInput();
     }
-        // Get the store instance
+
+    DB::beginTransaction();
+    try {
         $store = Store::findOrFail($request->store_id);
 
-    // Insert multiple rows
-    foreach ($salesData as $data) {
-        $data["prixTotal"] = $data['prix'] * $data['quantity'];
-        DB::table('store_products')
-            ->where('store_id', $request->store_id)
-            ->where('product_id', $data['product_id'])
-            ->decrement('quantity', $data['quantity']);
+        foreach ($salesData as $data) {
+            $data["prixTotal"] = $data['prix'] * $data['quantity'];
+            DB::table('store_products')
+                ->where('store_id', $request->store_id)
+                ->where('product_id', $data['product_id'])
+                ->decrement('quantity', $data['quantity']);
 
-        $prix_achat = Purchase::where('product_id', $data['product_id'])->first()->price;
-        $data["interet"] = ($data['prix'] - $prix_achat) * $data['quantity'];
-        $total_quantity += $data['quantity'];
-        $total_price += $data['prixTotal'];
+            $lastPurchase = Purchase::where('product_id', $data['product_id'])->first();
+            $prix_achat   = $lastPurchase ? $lastPurchase->price : 0;
+            $data["interet"] = ($data['prix'] - $prix_achat) * $data['quantity'];
+            $total_quantity += $data['quantity'];
+            $total_price    += $data['prixTotal'];
 
-        // Create sale record
-        Sale::create([
-            'numeroFacture' => $request->numeroFacture,
-            'product_id' => $data['product_id'],
-            'prix' => $data['prix'],
-            'quantity' => $data['quantity'],
-            'prixTotal' => $data['prixTotal'],
-            'interet' => $data['interet'],
-            'store_id' => $request->store_id
+            Sale::create([
+                'numeroFacture' => $request->numeroFacture,
+                'product_id'    => $data['product_id'],
+                'prix'          => $data['prix'],
+                'quantity'      => $data['quantity'],
+                'prixTotal'     => $data['prixTotal'],
+                'interet'       => $data['interet'],
+                'store_id'      => $request->store_id,
+            ]);
+
+            $store->balance += $data['interet'];
+            $store->save();
+            $i++;
+        }
+
+        $reste = $total_price - $request->avance;
+
+        if ($reste == 0) {
+            $statut   = 'payé';
+            $livraison = 'livré';
+        } elseif ($request->avance > 0 && $reste > 0) {
+            $statut   = 'partiel';
+            $livraison = 'non livré';
+        } else {
+            $statut   = 'non payé';
+            $livraison = 'non livré';
+        }
+
+        $facture = Facture::create([
+            'numero_facture' => $request->numeroFacture,
+            'store_id'       => $request->store_id,
+            'customer_id'    => $request->customer_id,
+            'montant_total'  => $total_price,
+            'quantity'       => $total_quantity,
+            'avance'         => $request->avance,
+            'notes'          => $request->notes,
+            'reste'          => $reste,
+            'statut'         => $statut,
+            'livraison'      => $livraison,
         ]);
 
-       // Update store balance by adding the interest from this sale
-       $store->balance += $data['interet'];  // Increase balance by the calculated interest
-       $store->save();  // Save the updated balance
+        Payment::create([
+            'facture_id' => $facture->id,
+            'versement'  => $facture->avance,
+            'total_paye' => $facture->avance,
+            'paid_by'    => $request->paid_by,
+            'reste'      => $reste,
+            'note'       => "Premier versement de " . $facture->avance . " GNF effectué à l'émission de la facture.",
+        ]);
 
-        
-        $i++;
+        DB::commit();
+        return redirect()->route('factures.index')->with('success', 'Vente créée, stock mis à jour avec succès.');
+
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        return redirect()->back()->with('fall', 'Erreur lors de la création : ' . $th->getMessage())->withInput();
     }
-
-    $reste = $total_price - $request->avance;
-
-    // Determine the statut based on the avance
-    if ($reste == 0) {
-        $statut = 'payé';
-        $livraison = 'livré';
-    } elseif ($request->avance > 0 && $reste > 0) {
-        $statut = 'partiel';
-        $livraison = 'non livré';
-    } else {
-        $statut = 'non payé';
-        $livraison = 'non livré';
-    }
-
-    // Create the facture
-    $facture = Facture::create([
-        'numero_facture' => $request->numeroFacture,
-        'store_id' => $request->store_id,
-        'customer_id' => $request->customer_id,
-        'montant_total' => $total_price,
-        'quantity' => $total_quantity,
-        'avance' => $request->avance,
-        'notes' => $request->notes,
-        'reste' => $reste,
-        'statut' => $statut,
-        'livraison' => $livraison,
-    ]);
-
-    // Create the payment record for the advance
-    Payment::create([
-        'facture_id' => $facture->id,
-        'versement' => $facture->avance,
-        'total_paye' => $facture->avance,
-        'paid_by' => $request->paid_by,
-        'reste' => $reste,
-        'note' => "un premier versement de ".$facture->avance." effectué lors de l'emission de la facture comme avance."
-    ]);
-
-    // Redirect back with a success message
-    return redirect()->route('factures.index')->with('success', 'Vente créee, et stock mis à jour avec succès');
 }
 
 
@@ -269,61 +268,45 @@ public function store(Request $request)
             return redirect()->route('sales.index')->with('error', 'Vente non trouvée.');
         }
 
+        DB::beginTransaction();
         try {
-            // Fetch the invoice associated with the sale
             $invoice = Facture::where('numero_facture', $sale->numeroFacture)->first();
             if (!$invoice) {
+                DB::rollBack();
                 return redirect()->route('sales.index')->with('error', 'Facture non trouvée.');
             }
 
-            // Fetch payments associated with the invoice
-            $paiements = Payment::where('facture_id', $invoice->id)->get();
-
-            // Calculate the remaining quantity and amount after the update
+            $paiements     = Payment::where('facture_id', $invoice->id)->get();
             $resteQuantity = $sale->quantity - $request->quantity;
-            $resteMontant = ($sale->quantity * $sale->prix) - ($request->quantity * $request->prix);
+            $resteMontant  = ($sale->quantity * $sale->prix) - ($request->quantity * $request->prix);
 
-            // Update the invoice
-            $invoice->quantity -= $resteQuantity;
+            $invoice->quantity      -= $resteQuantity;
             $invoice->montant_total -= $resteMontant;
-            $invoice->reste -= $resteMontant;
+            $invoice->reste         -= $resteMontant;
             $invoice->save();
 
-            // Update payments
             foreach ($paiements as $pay) {
                 $pay->reste -= $resteMontant;
                 $pay->save();
             }
 
-            // Update or create the store product stock
             StoreProduct::updateOrCreate(
-                [
-                    'store_id' => $sale->store_id,
-                    'product_id' => $sale->product_id,
-                ],
-                [
-                    'quantity' => DB::raw("quantity + {$resteQuantity}"), // Add back the remaining quantity
-                ]
+                ['store_id' => $sale->store_id, 'product_id' => $sale->product_id],
+                ['quantity' => DB::raw("quantity + {$resteQuantity}")]
             );
 
-            // Update the sale record
-            $sale->prix = $request->prix;
-            $sale->quantity = $request->quantity;
+            $prixAchat     = Purchase::where('product_id', $sale->product_id)->first()?->price ?? 0;
+            $sale->prix    = $request->prix;
+            $sale->quantity  = $request->quantity;
             $sale->prixTotal = $request->quantity * $request->prix;
-
-            // Fetch the purchase price for the product
-            $purchase = Purchase::where('product_id', $sale->product_id)->first();
-            if (!$purchase) {
-                return redirect()->route('sales.index')->with('error', 'Achat non trouvé pour le produit.');
-            }
-
-            $prixAchat = $purchase->price;
-            $sale->interet = ($request->prix - $prixAchat) * $request->quantity;
+            $sale->interet   = ($request->prix - $prixAchat) * $request->quantity;
             $sale->save();
 
+            DB::commit();
             return redirect()->route('sales.index')->with('success', 'Vente modifiée avec succès.');
         } catch (\Throwable $th) {
-            return redirect()->route('sales.index')->with('error', 'La vente n\'a pas été modifiée. Raison : ' . $th->getMessage());
+            DB::rollBack();
+            return redirect()->route('sales.index')->with('error', 'La vente n\'a pas été modifiée : ' . $th->getMessage());
         }
     }
 

@@ -52,6 +52,10 @@ class BaseDonneeController extends Controller
     }
     public function delete($id){
         //dd($id);
+        $allowed = ['category_products', 'order_items', 'orders', 'sales', 'factures', 'payments', 'purchases', 'expenses', 'store_products', 'transfers', 'logistics'];
+        if (!in_array($id, $allowed)) {
+            return redirect()->back()->with('error', 'Table non autorisée.');
+        }
         try {
             DB::statement('SET FOREIGN_KEY_CHECKS=0;'); // Disable foreign key constraints
             DB::table($id)->truncate();

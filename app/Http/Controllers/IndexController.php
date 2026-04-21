@@ -27,10 +27,9 @@ class IndexController extends Controller
     {
         if (auth()->user()->role_id == 3) {
             $userStoreId = auth()->user()->id;
-            try {
-                $store_id = Store::where('user_id', $userStoreId)->first()->id;
-            } catch (\Throwable $th) {
-                return redirect('login')->with('error','Dites au manager de vous attribuer à une boutique afin de pouvoir continuer');
+            $store_id = Store::where('user_id', $userStoreId)->first()?->id;
+            if (!$store_id) {
+                return redirect('login')->with('error', 'Dites au manager de vous attribuer à une boutique afin de pouvoir continuer');
             }
            // Produits les plus vendus pour ce store
             // Produits les plus rentables (par chiffre d'affaires)

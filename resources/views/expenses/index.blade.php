@@ -106,7 +106,7 @@
                                             <td>{{ $expense->reference }}</td>
                                             <td>{{ $expense->exp_mode }}</td>
                                             <td>{{ $expense->category->categoryName }}</td>
-                                            <td>{{ $expense->amount }}</td>
+                                            <td>{{ number_format($expense->amount, 0, ',', ' ') }} GNF</td>
                                             <td>{{ $expense->description }}</td>
                                             <td>{{ $expense->created_at }}</td>
                                             <td>

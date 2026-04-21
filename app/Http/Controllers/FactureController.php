@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\Facture;
+use App\Models\Order;
 use App\Models\Payment;
 use App\Models\Store;
 use App\Models\Product;
@@ -44,7 +45,7 @@ class FactureController extends Controller
         }
 
         if (auth()->user()->role_id == 3) {
-            $dataTable = $query->where('store_id', Store::where('user_id', auth()->user()->id)->first()->id)->get();
+            $dataTable = $query->where('store_id', Store::where('user_id', auth()->user()->id)->first()?->id)->get();
         } else {
             $dataTable = $query->get();
         }
@@ -54,9 +55,12 @@ class FactureController extends Controller
 
     public function show($facture){
         $user = User::where('role_id', 2)->first();
-        $invoice = Sale::where('numeroFacture', $facture)->get();
-        $laFacture = Facture::where('numero_facture', $facture)->first();
-        $customer = Customer::where('id', $laFacture->customer_id)->first();
+        // Supporte à la fois l'ID numérique et le numéro de facture texte
+        $laFacture = is_numeric($facture)
+            ? Facture::findOrFail($facture)
+            : Facture::where('numero_facture', $facture)->firstOrFail();
+        $invoice   = Sale::where('numeroFacture', $laFacture->numero_facture)->get();
+        $customer  = Customer::find($laFacture->customer_id);
         $paiements = Payment::where('facture_id', $laFacture->id)->get();
         return view('factures.show', compact('invoice', 'facture', 'laFacture', 'customer', 'user', 'paiements'));
     }
@@ -125,9 +129,14 @@ class FactureController extends Controller
         try {
             $facture->livraison = 'livré';
             $facture->save();
-            return redirect()->back()->with('success', 'Votre facture a été mis à jour: livré');
+
+            // Mettre à jour la commande e-commerce liée
+            Order::where('invoice_number', $facture->numero_facture)
+                ->update(['status' => 'completed']);
+
+            return redirect()->back()->with('success', 'Livraison confirmée.');
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'erreur lors de la modification'.$th->getMessage());
+            return redirect()->back()->with('error', 'Erreur lors de la modification : ' . $th->getMessage());
         }
     }
 }

@@ -28,6 +28,8 @@
                         <li><a href="{{ route('sales.index') }}">Vente List</a></li>
                         <li><a href="{{ route('factures.index') }}">Facture List</a></li>
                         <li><a href="{{ route('payments.index') }}">Paiement List</a></li>
+                        <li><a href="{{ route('admin.orders.index') }}">Commandes à valider</a></li>
+                        <li><a href="{{ route('admin.orders.confirmed') }}">Ventes confirmées</a></li>
                     </ul>
                 </li>
                 <li class="submenu">

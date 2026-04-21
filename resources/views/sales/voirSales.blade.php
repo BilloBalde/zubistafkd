@@ -56,9 +56,9 @@
                                                 <a href="javascript:void(0);">{{ $data->produit }}</a>
                                             </td>
                                             <td>{{ $data->quantity }}</td>
-                                            <td>{{ $data->prix }}</td>
-                                            <td>{{ $data->prixTotal }}</td>
-                                            <td>{{ $data->interet }}</td>
+                                            <td>{{ number_format($data->prix, 0, ',', ' ') }} GNF</td>
+                                            <td>{{ number_format($data->prixTotal, 0, ',', ' ') }} GNF</td>
+                                            <td>{{ number_format($data->interet, 0, ',', ' ') }} GNF</td>
                                             <td>{{ $data->created_at }}</td>
                                             <td class="text-end">
                                                 @if (App\Models\Facture::where('numero_facture', $data->numeroFacture)->first()->statut == 'pending')

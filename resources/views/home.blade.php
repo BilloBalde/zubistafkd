@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>FBK-Printing - Révélez votre éclat naturel</title>
 
     {{-- Tailwind CSS CDN --}}
@@ -277,24 +278,47 @@
                 </div>
                <div class="flex items-center space-x-4">
                     @auth
-                        {{-- Utilisateur connecté --}}
-                        <a href="{{ route('home') }}" class="text-gray-700 hover:text-amber-600 transition font-medium">
-                            <i class="fas fa-user-circle text-xl"></i>
-                            <span class="hidden sm:inline"> Mon compte</span>
-                        </a>
+                        @if(Auth::user()->isCustomer())
+                            <a href="{{ route('shop.home') }}" class="text-gray-700 hover:text-amber-600 transition font-medium text-sm">
+                                <i class="fas fa-store text-xl"></i>
+                                <span class="hidden sm:inline"> Ma boutique</span>
+                            </a>
+                            <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-amber-600 transition font-medium text-sm">
+                                <i class="fas fa-receipt text-xl"></i>
+                                <span class="hidden sm:inline"> Mes commandes</span>
+                            </a>
+                            <form method="POST" action="{{ route('shop.logout') }}" class="inline">
+                                @csrf
+                                <button type="submit" class="text-gray-700 hover:text-amber-600 transition font-medium text-sm">
+                                    <i class="fas fa-sign-out-alt text-xl"></i>
+                                    <span class="hidden sm:inline"> Déconnexion</span>
+                                </button>
+                            </form>
+                        @else
+                            <a href="{{ route('home') }}" class="text-gray-700 hover:text-amber-600 transition font-medium">
+                                <i class="fas fa-tachometer-alt text-xl"></i>
+                                <span class="hidden sm:inline"> Espace gestion</span>
+                            </a>
+                            <a href="{{ url('/logout') }}" class="text-gray-700 hover:text-amber-600 transition font-medium text-sm">
+                                <i class="fas fa-sign-out-alt text-xl"></i>
+                                <span class="hidden sm:inline"> Déconnexion</span>
+                            </a>
+                        @endif
                     @else
-                        {{-- Utilisateur non connecté --}}
-                        <a href="{{ route('login') }}" class="text-gray-700 hover:text-amber-600 transition font-medium">
+                        <a href="{{ route('otp.login') }}" class="text-gray-700 hover:text-amber-600 transition font-medium">
                             <i class="fas fa-sign-in-alt text-xl"></i>
                             <span class="hidden sm:inline"> Se connecter</span>
                         </a>
+                        <a href="{{ route('login') }}" class="text-gray-500 hover:text-amber-600 transition text-xs hidden lg:inline" title="Connexion équipe">Pro</a>
                     @endauth
 
                     {{-- Panier --}}
-                    <button class="relative p-2 text-gray-700 hover:text-amber-600 transition">
+                    <a href="{{ route('panier') }}" class="relative p-2 text-gray-700 hover:text-amber-600 transition">
                         <i class="fas fa-shopping-bag text-xl"></i>
-                        <span class="absolute top-0 right-0 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
-                    </button>
+                        <span id="cart-count" class="absolute top-0 right-0 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            {{ count(session('cart', [])) }}
+                        </span>
+                    </a>
 
                     {{-- Menu mobile --}}
                     <button class="md:hidden p-2 text-gray-700" id="mobileMenuBtn">
@@ -436,7 +460,7 @@
                         <hr class="filter-divider">
 
                         <div class="filter-group">
-                            <span class="filter-label">Prix (GNF / €)</span>
+                            <span class="filter-label">Prix (GNF)</span>
                             <div class="price-inputs">
                                 <input type="number" id="min-best" placeholder="Min" min="0" oninput="filterProducts('best')">
                                 <span class="price-sep">—</span>
@@ -786,7 +810,7 @@
             const badgeTxt = isPromo ? `-${p.discount}%` : 'Top vente';
             const badgeCls = isPromo ? 'badge-promo' : 'badge-best';
             const oldHTML  = p.old_price
-                ? `<span class="prod-price-old">${parseFloat(p.old_price).toFixed(2)}€</span>`
+                ? `<span class="prod-price-old">${Number(p.old_price).toLocaleString('fr-FR')} GNF</span>`
                 : '';
             
             const imgHTML = p.image
@@ -802,7 +826,7 @@
                     <div class="prod-cat-tag">${p.category_name ?? ''}</div>
                     <div class="prod-stars">${stars} <span style="color:#9ca3af;font-size:11px;">${parseFloat(p.rating).toFixed(1)}</span></div>
                     <div class="prod-price-row">
-                        <span class="prod-price">${parseFloat(p.price).toFixed(2)}€</span>
+                        <span class="prod-price">${Number(p.price).toLocaleString('fr-FR')} GNF</span>
                         ${oldHTML}
                     </div>
                     <button class="prod-btn" onclick="addToCart(${p.id})">
@@ -886,26 +910,37 @@
             }, 10);
         }
 
-        /* ── Panier (à connecter à votre logique) ── */
+        /* ── Panier (avec débogage) ── */
         function addToCart(id) {
-            fetch(`/shop/cart/add/${id}`, {
+            console.log("Tentative d'ajout du produit ID:", id);
+            
+            fetch(`{{ url('/cart/add') }}/${id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? ''
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(r => r.json())
-            .then(d => {
+            .then(response => {
+                console.log("Réponse reçue, statut:", response.status);
+                if (!response.ok) throw new Error('Erreur réseau ou produit introuvable');
+                return response.json();
+            })
+            .then(data => {
+                console.log("Données reçues:", data);
                 const badge = document.getElementById('cart-count');
-                if (badge && d.count !== undefined) {
-                    badge.textContent = d.count;
-                    // Animation légère
+                if (badge && data.count !== undefined) {
+                    badge.textContent = data.count;
                     badge.classList.add('animate__animated', 'animate__rubberBand');
                     setTimeout(() => badge.classList.remove('animate__animated', 'animate__rubberBand'), 1000);
                 }
+                alert("Produit ajouté au panier !");
             })
-            .catch(() => {});
+            .catch(error => {
+                console.error("Erreur lors de l'ajout:", error);
+                alert("Erreur : Impossible d'ajouter le produit au panier.");
+            });
         }
 
         /* ── Init ── */

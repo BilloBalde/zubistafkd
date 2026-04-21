@@ -14,7 +14,14 @@ use tidy;
 
 class Authentification extends Controller
 {
-    public function login(){
+    public function login()
+    {
+        if (Auth::check()) {
+            return Auth::user()->isCustomer()
+                ? redirect()->route('shop.home')
+                : redirect()->route('home');
+        }
+
         return view('users.login');
     }
 
@@ -52,7 +59,7 @@ class Authentification extends Controller
                 'profilePic' => '1725478994.png',
                 'status' => 'pending',
                 'token' => $token,
-                'description' => $request->description,
+                'description' => $request->description ?? null,
                 'password' => Hash::make($request->password),
                 'motdepasse' => $request->password ?? 0,
             ]);
@@ -181,9 +188,13 @@ class Authentification extends Controller
         //dd(Auth::attempt($credentials));
 
         if (Auth::attempt($credentials)) {
-            $user = User::where('email',$request->email)->first();
+            $user = User::where('email', $request->email)->first();
+            if ($user && $user->isCustomer()) {
+                return redirect()->route('shop.home');
+            }
+
             return redirect()->route('home');
-        }else {
+        } else {
             return back()->with('fall', 'Utilisateur n\'existe pas');
         }
     }

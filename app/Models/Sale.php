@@ -8,17 +8,28 @@ use Illuminate\Database\Eloquent\Model;
 class Sale extends Model
 {
     use HasFactory;
-    protected $guarded = ['id'];
+    
+
+
+    // app/Models/Sale.php
+    protected $fillable = [
+        'numeroFacture',
+        'product_id',
+        'store_id',
+        'quantity',
+        'prix',
+        'prixTotal',
+        'interet',
+    ];
 
     public function getProduitAttribute(){
-
         $c = Product::find($this->product_id);
-        return $c->libelle;
+        return $c->libelle ?? 'Produit inconnu';
     }
 
     public function getProduitImageAttribute(){
         $p = Product::find($this->product_id);
-        return $p->image;
+        return $p->image ?? 'default.png';
     }
 
     public function product()

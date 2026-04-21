@@ -18,14 +18,6 @@
         </span>
     </a>
     <ul class="nav user-menu">
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('cart.show') }}">
-                <i class="fas fa-shopping-bag" style="font-size: 20px; color: #637381;"></i>
-                <span class="badge rounded-pill bg-warning text-dark" id="cart-count" style="position: absolute; top: 5px; right: 5px; font-size: 10px;">
-                    {{ count(session('cart', [])) }}
-                </span>
-            </a>
-        </li>
         <li class="nav-item has-arrow flag-nav">
             <a class="nav-link" href="{{ route('pos') }}" style="background-color: rgb(217, 180, 112)">
                 <img src="{{ asset('assets/img/icons/sales1.svg') }}" alt="" height="20">POS

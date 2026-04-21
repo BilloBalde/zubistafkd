@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Ecommerce;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class OrderRequest extends FormRequest
 {
@@ -14,7 +15,10 @@ class OrderRequest extends FormRequest
     public function rules()
     {
         return [
-            'delivery_address_id' => 'required|exists:delivery_addresses,id',
+            'delivery_address_id' => [
+                'required',
+                Rule::exists('delivery_addresses', 'id')->where('user_id', auth()->id()),
+            ],
             'payment_method' => 'required|in:cod,orange_money',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',

@@ -20,9 +20,9 @@ class CartController extends Controller
             // Sinon on l'ajoute
             $cart[$id] = [
                 "product_id" => $product->id,
-                "name" => $product->name,
+                "name" => $product->libelle,
                 "quantity" => 1,
-                "price" => $product->price,
+                "price" => $product->promo_price ?? $product->price,
                 "image" => $product->image
             ];
         }

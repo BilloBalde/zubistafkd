@@ -8,7 +8,6 @@
 
         <div class="main-wrapper">
             @include('layouts.header')
-
             @include('layouts.sidebar')
 
             <div class="page-wrapper">
@@ -19,7 +18,6 @@
                             <h6>Gerer vos Ventes</h6>
                         </div>
                         <div class="page-btn">
-                            {{-- <a class="btn btn-added" data-bs-toggle="modal" data-bs-target="#addsale"><img src="{{ asset('assets/img/icons/plus.svg') }}" alt="img" class="me-2">Vendre</a> --}}
                             <a class="btn btn-added" href="{{ route('pos') }}">
                                 Vendre
                             </a>
@@ -44,7 +42,7 @@
                             </div>
                             <div class="card" id="filter_inputs">
                                 <div class="card-body pb-0">
-                                    <form action="{{ route('sales.index') }}" method="GET"> <!-- Update to GET method -->
+                                    <form action="{{ route('sales.index') }}" method="GET">
                                         @csrf
                                         <div class="row">
                                             <div class="col-lg-3 col-sm-6 col-12">
@@ -78,7 +76,7 @@
                                 </div>
                             </div>
                             <div class="table-responsive">
-                                <table class="table  datanew">
+                                <table class="table datanew">
                                     <thead>
                                         <tr>
                                             <th>No. Facture</th>
@@ -102,17 +100,20 @@
                                                 <a href="javascript:void(0);">{{ $data->produit }}</a>
                                             </td>
                                             <td>{{ $data->quantity }}</td>
-                                            <td>{{ $data->prix }}</td>
-                                            <td>{{ $data->prixTotal }}</td>
-                                            <td>{{ $data->interet }}</td>
+                                            <td>{{ number_format($data->prix, 0, ',', ' ') }} GNF</td>
+                                            <td>{{ number_format($data->prixTotal, 0, ',', ' ') }} GNF</td>
+                                            <td>{{ number_format($data->interet, 0, ',', ' ') }} GNF</td>
                                             <td>{{ $data->created_at }}</td>
                                             <td class="text-end">
-                                                @if (App\Models\Facture::where('numero_facture', $data->numeroFacture)->first()->statut == 'pending')
-                                                <a class="me-3" href="{{ route('sales.edit', $data->id) }}">
-                                                    <img src="assets/img/icons/edit.svg" alt="img">
-                                                </a>
+                                                @php
+                                                    $facture = App\Models\Facture::where('numero_facture', $data->numeroFacture)->first();
+                                                @endphp
+                                                @if ($facture && $facture->statut == 'pending')
+                                                    <a class="me-3" href="{{ route('sales.edit', $data->id) }}">
+                                                        <img src="assets/img/icons/edit.svg" alt="img">
+                                                    </a>
                                                 @else
-                                                No action
+                                                    No action
                                                 @endif
                                             </td>
                                         </tr>
@@ -127,7 +128,6 @@
         </div>
 
         @include('factures.add')
-
         @include('layouts.scripts')
     </body>
 </html>

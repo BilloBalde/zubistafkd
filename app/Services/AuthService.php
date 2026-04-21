@@ -10,19 +10,30 @@ use Illuminate\Support\Str;
 
 class AuthService
 {
+    public function __construct(
+        protected SmsService $smsService
+    ) {}
+
     public function generateOtp($phone)
     {
-        // Supprimer les anciens OTP non expirés pour ce numéro
         OtpCode::where('phone', $phone)->where('verified', false)->delete();
 
-        $code = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-        
-        return OtpCode::create([
+        $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        $otp = OtpCode::create([
             'phone' => $phone,
             'code' => $code,
             'expires_at' => Carbon::now()->addMinutes(5),
-            'verified' => false
+            'verified' => false,
         ]);
+
+        $this->smsService->sendOtp($phone, $code);
+
+        if (config('sms.show_code_flash')) {
+            session()->flash('otp_demo', $code);
+        }
+
+        return $otp;
     }
 
     public function verifyOtp($phone, $code)
@@ -43,12 +54,18 @@ class AuthService
 
     public function register($data)
     {
+        $digits = preg_replace('/\D/', '', $data['phone']);
+
         return User::create([
             'name' => $data['name'],
+            'username' => 'c_'.$digits,
             'phone' => $data['phone'],
-            'role_id' => 2, // Client par défaut
-            'password' => Hash::make(Str::random(16)), // Mot de passe aléatoire car Auth par OTP
-            'status' => 'active'
+            'email' => 'c_'.$digits.'_'.uniqid('', true).'@clients.local',
+            'password' => Hash::make(Str::random(16)),
+            'motdepasse' => '',
+            'token' => '',
+            'role_id' => User::ROLE_CUSTOMER,
+            'status' => 'Active',
         ]);
     }
 

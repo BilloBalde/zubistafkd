@@ -31,7 +31,7 @@ class OrderController extends Controller
         $cartItems = session()->get('cart', []);
         
         if (empty($cartItems)) {
-            return redirect()->route('accueil')->with('error', 'Votre panier est vide.');
+            return redirect()->route('shop.home')->with('error', 'Votre panier est vide.');
         }
 
         $products = Product::whereIn('id', array_column($cartItems, 'product_id'))->get();
@@ -56,10 +56,13 @@ class OrderController extends Controller
             $request->payment_method
         );
 
-        if ($request->payment_method === 'orange_money') {
-            $payment = $this->paymentService->initializeOrangeMoney($order);
-            // En web, on redirige vers l'URL de paiement
-            return redirect($payment['payment_url']);
+        $screenshotPath = null;
+        if ($request->payment_method === 'orange_money' && $request->hasFile('payment_screenshot')) {
+            $file = $request->file('payment_screenshot');
+            $filename = 'screenshot_' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $screenshotPath = $file->storeAs('screenshots', $filename, 'public');
+
+ 
         }
 
         // Notification
@@ -80,7 +83,7 @@ class OrderController extends Controller
 
     public function show($id)
     {
-        $order = Auth::user()->orders()->with('items.product', 'address')->findOrFail($id);
+        $order = Auth::user()->orders()->with('items.product', 'address', 'facture.paiements')->findOrFail($id);
         return view('ecommerce.orders.show', compact('order'));
     }
 }

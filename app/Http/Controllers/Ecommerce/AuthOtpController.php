@@ -53,7 +53,11 @@ class AuthOtpController extends Controller
 
     public function showVerify(Request $request)
     {
-        $phone = $request->phone;
+        $phone = $request->query('phone');
+        if (! $phone) {
+            return redirect()->route('otp.login')->with('error', 'Indiquez d\'abord votre numéro sur la page de connexion.');
+        }
+
         return view('ecommerce.auth.verify', compact('phone'));
     }
 
@@ -69,7 +73,7 @@ class AuthOtpController extends Controller
         if ($verified) {
             $user = $this->authService->login($request->phone);
             Auth::login($user);
-            return redirect()->route('accueil')->with('success', 'Bienvenue !');
+            return redirect()->route('shop.home')->with('success', 'Bienvenue !');
         }
 
         return back()->withErrors(['code' => 'Code OTP invalide ou expiré.']);

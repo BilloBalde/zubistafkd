@@ -36,6 +36,28 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    /** Administrateur (back-office complet). */
+    public const ROLE_ADMIN = 1;
+
+    /** Manager / superuser plateforme. */
+    public const ROLE_MANAGER = 2;
+
+    /** Gérant de boutique (tableau de bord magasin). */
+    public const ROLE_STORE_MANAGER = 3;
+
+    /** Client e-commerce (boutique en ligne uniquement). */
+    public const ROLE_CUSTOMER = 4;
+
+    public function isStaff(): bool
+    {
+        return in_array((int) $this->role_id, [self::ROLE_ADMIN, self::ROLE_MANAGER, self::ROLE_STORE_MANAGER], true);
+    }
+
+    public function isCustomer(): bool
+    {
+        return (int) $this->role_id === self::ROLE_CUSTOMER;
+    }
+
     public function getRoleAttribute(){
 
         $c = Role::find($this->role_id);

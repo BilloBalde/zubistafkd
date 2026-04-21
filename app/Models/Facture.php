@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Facture;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,7 +13,7 @@ class Facture extends Model
 
     public function getCustomerNameAttribute(){
         $client = Customer::find($this->customer_id);
-        return $client->customerName.'-'.$client->mark;
+        return $client ? $client->customerName . '-' . $client->mark : 'Client inconnu';
     }
 
     public function store(){
@@ -29,5 +30,11 @@ class Facture extends Model
 
     public function paiements() {
         return $this->hasMany(Payment::class);
+    }
+    
+    // app/Models/Sale.php
+    public function facture()
+    {
+        return $this->hasOne(Facture::class, 'numero_facture', 'numeroFacture');
     }
 }

@@ -117,9 +117,9 @@
                                             <td>{{ $data->customerName }}</td>
                                             <td>{{ $data->store->store_name }}</td>
                                             <td>{{ $data->quantity }}</td>
-                                            <td>{{ $data->montant_total }}</td>
-                                            <td>{{ $data->avance }}</td>
-                                            <td>{{ $data->reste }}</td>
+                                            <td>{{ number_format($data->montant_total, 0, ',', ' ') }} GNF</td>
+                                            <td>{{ number_format($data->avance, 0, ',', ' ') }} GNF</td>
+                                            <td>{{ number_format($data->reste, 0, ',', ' ') }} GNF</td>
                                             <td>
                                                 <span class="badge
                                                     @if ($data->statut === 'payé') bg-success

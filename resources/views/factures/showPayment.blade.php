@@ -52,9 +52,9 @@
                                         <tr class="bor-b1">
                                         <td>{{ $item->created_at }}</td>
                                         <td>{{ $item->numeroFacture }}</td>
-                                        <td>{{ $item->versement }}</td>
-                                        <td>{{ $item->total_paye }}</td>
-                                        <td>{{ $item->reste }}</td>
+                                        <td>{{ number_format($item->versement, 0, ',', ' ') }} GNF</td>
+                                        <td>{{ number_format($item->total_paye, 0, ',', ' ') }} GNF</td>
+                                        <td>{{ number_format($item->reste, 0, ',', ' ') }} GNF</td>
                                         <td>{{ $item->paid_by }}</td>
                                         <td>{{ $item->note }}</td>
                                         </tr>

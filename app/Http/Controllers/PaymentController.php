@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\Facture;
+use App\Models\Order;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -68,64 +69,81 @@ class PaymentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'paid_by' => 'required',
-            'versement' => 'required|numeric',
-            'note' => 'nullable|string',
-        ],[
-            'paid_by.required' => 'Veuillez selectionner le moyen de paiement',
-            'versement.required' => 'Veuillez entrer un montant, à la rigueure 0',
-        ]);
+        public function store(Request $request)
+        {
+            $validator = Validator::make($request->all(), [
+                'paid_by'   => 'required',
+                'versement' => 'required|numeric',
+                'note'      => 'nullable|string',
+            ], [
+                'paid_by.required'   => 'Veuillez selectionner le moyen de paiement',
+                'versement.required' => 'Veuillez entrer un montant, à la rigueure 0',
+            ]);
 
-        try {
-            $old = Payment::where('facture_id', $request->facture_id)->orderBy('id', 'DESC')->first();
-            $total_paye = $old->total_paye + $request->versement;
-            $reste = $old->reste - $request->versement;
-            if ($reste >= 0) {
-               // dd($old);
-                Payment::create([
-                    "facture_id" => $request->facture_id,
-                    "versement" => $request->versement,
-                    "paid_by" => $request->paid_by,
-                    "note" => $request->note,
-                    "total_paye" => $total_paye,
-                    "reste" => $reste
-                ]);
-            }
-            //dd($old, $total_paye, $reste);
-            if($reste == 0){
-                $factu = Facture::where('id', $request->facture_id);
-                $factu->update([
-                    'statut'=>'payé',
-                    'reste'=>$reste
-                ]);
-                $client_id = $factu->first()->customer_id;
-                $client = Customer::where('id',$client_id)->first()->customerName;
-                $sms = "Facture ".$factu->first()->numero_facture." mis à jour et le montant total a été payée, merci au client ".$client;
-                session(['success' => $sms]);
-                return redirect()->route('factures.index');
-            }
-            elseif ($reste > 0) {
-                $factu = Facture::where('id',$request->facture_id);
-                $factu->update([
-                    'statut'=>'partiel',
-                    'reste'=>$reste
-                ]);
-                $sms = "Le montant de ".$request->versement." a été versé au compte de la facture ".$factu->first()->numero_facture.".";
-                session(['success' => $sms]);
-                return redirect()->route('factures.index');
-            } else {
-                $sms = "Le montant ne peut pas être négatif ou supérieur au montant total";
-                session(['success' => $sms]);
-                return redirect()->route('factures.index');
+            if ($validator->fails()) {
+                return back()->withErrors($validator)->withInput();
             }
 
-        } catch (\Throwable $th) {
-            return back()->with('fall', 'une erreur lors de lajout, voici le message : '.$th->getMessage());
+            try {
+                // Récupérer la facture une seule fois pour éviter les multiples requêtes
+                $facture = Facture::findOrFail($request->facture_id);
+                
+                // Récupérer le dernier paiement (s'il existe)
+                $old = Payment::where('facture_id', $request->facture_id)
+                            ->orderBy('id', 'DESC')
+                            ->first();
+        
+                if ($old) {
+                    // Cas où un paiement précédent existe
+                    $total_paye = $old->total_paye + $request->versement;
+                    $reste      = $old->reste - $request->versement;
+                } else {
+                    // Premier paiement : initialisation
+                    $total_paye = $request->versement;
+                    $reste      = $facture->montant_total - $request->versement;
+                }
+        
+                // Vérification du montant restant
+                if ($reste >= 0) {
+                    Payment::create([
+                        "facture_id" => $request->facture_id,
+                        "versement"  => $request->versement,
+                        "paid_by"    => $request->paid_by,
+                        "note"       => $request->note,
+                        "total_paye" => $total_paye,
+                        "reste"      => $reste
+                    ]);
+                } else {
+                    // Montant trop élevé
+                    session(['success' => 'Le montant versé dépasse le reste à payer.']);
+                    return redirect()->route('factures.index');
+                }
+        
+                // Mise à jour du statut de la facture
+                if ($reste == 0) {
+                    $facture->update(['statut' => 'payé', 'reste' => $reste]);
+                    $client = Customer::find($facture->customer_id)?->customerName ?? 'Client inconnu';
+                    $sms = "Facture {$facture->numero_facture} mise à jour et le montant total a été payé, merci au client {$client}";
+                } elseif ($reste > 0) {
+                    $facture->update(['statut' => 'partiel', 'reste' => $reste]);
+                    $sms = "Le montant de {$request->versement} a été versé au compte de la facture {$facture->numero_facture}.";
+                }
+
+                // Synchroniser le statut de paiement sur la commande e-commerce liée
+                $order = Order::where('invoice_number', $facture->numero_facture)->first();
+                if ($order) {
+                    $order->update([
+                        'payment_status' => $reste == 0 ? 'paid' : 'pending',
+                    ]);
+                }
+        
+                session(['success' => $sms]);
+                return redirect()->route('factures.index');
+        
+            } catch (\Throwable $th) {
+                return back()->with('fall', 'Une erreur lors de l\'ajout : ' . $th->getMessage());
+            }
         }
-    }
 
 
 

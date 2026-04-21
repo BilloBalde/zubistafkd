@@ -9,7 +9,7 @@
                     <span><img src="{{ asset('assets/img/icons/dash2.svg') }}" alt="img"></span>
                 </div>
                 <div class="dash-widgetcontent">
-                    <h5><span class="counters" data-count="{{ $total_purchases }}">{{ numberDelimiter($total_purchases) }}</span> FG</h5>
+                    <h5><span class="counters" data-count="{{ $total_purchases }}">{{ numberDelimiter($total_purchases) }}</span> GNF</h5>
                     <h6>Total Achat</h6>
                 </div>
             </div>
@@ -20,7 +20,7 @@
                     <span><img src="{{ asset('assets/img/icons/dash2.svg') }}" alt="img"></span>
                 </div>
                 <div class="dash-widgetcontent">
-                    <h5><span class="counters" data-count="{{ $total_sales }}">{{ numberDelimiter($total_sales) }}</span> FG</h5>
+                    <h5><span class="counters" data-count="{{ $total_sales }}">{{ numberDelimiter($total_sales) }}</span> GNF</h5>
                     <h6>Total Ventes</h6>
                 </div>
             </div>
@@ -31,7 +31,7 @@
                     <span><img src="{{ asset('assets/img/icons/dash2.svg') }}" alt="img"></span>
                 </div>
                 <div class="dash-widgetcontent">
-                    <h5><span class="counters" data-count="{{ $total_expenses }}">{{ numberDelimiter($total_expenses) }}</span> FG</h5>
+                    <h5><span class="counters" data-count="{{ $total_expenses }}">{{ numberDelimiter($total_expenses) }}</span> GNF</h5>
                     <h6>Total dépenses</h6>
                 </div>
             </div>
@@ -42,7 +42,7 @@
                     <span><img src="{{ asset('assets/img/icons/dash2.svg') }}" alt="img"></span>
                 </div>
                 <div class="dash-widgetcontent">
-                    <h5><span class="counters" data-count="{{ $gains }}">{{ numberDelimiter($gains) }}</span> FG</h5>
+                    <h5><span class="counters" data-count="{{ $gains }}">{{ numberDelimiter($gains) }}</span> GNF</h5>
                     <h6>Total gains</h6>
                 </div>
             </div>
@@ -73,7 +73,7 @@
                     <span><img src="{{ asset('assets/img/icons/dash2.svg') }}" alt="img"></span>
                 </div>
                 <div class="dash-widgetcontent">
-                    <h5><span class="counters" data-count="{{ $total_purchases }}">{{ numberDelimiter($total_purchases) }}</span> FG</h5>
+                    <h5><span class="counters" data-count="{{ $total_purchases }}">{{ numberDelimiter($total_purchases) }}</span> GNF</h5>
                     <h6>Total Achat</h6>
                 </div>
             </div>
@@ -84,7 +84,7 @@
                     <span><img src="{{ asset('assets/img/icons/dash2.svg') }}" alt="img"></span>
                 </div>
                 <div class="dash-widgetcontent">
-                    <h5><span class="counters" data-count="{{ $total_stock_transfer }}">{{ numberDelimiter($total_stock_transfer) }}</span> FG</h5>
+                    <h5><span class="counters" data-count="{{ $total_stock_transfer }}">{{ numberDelimiter($total_stock_transfer) }}</span> GNF</h5>
                     <h6>Total Transfert</h6>
                 </div>
             </div>
@@ -96,7 +96,7 @@
                     <span><img src="{{ asset('assets/img/icons/dash2.svg') }}" alt="img"></span>
                 </div>
                 <div class="dash-widgetcontent">
-                    <h5><span class="counters" data-count="{{ $total_sales }}">{{ numberDelimiter($total_sales) }}</span> FG</h5>
+                    <h5><span class="counters" data-count="{{ $total_sales }}">{{ numberDelimiter($total_sales) }}</span> GNF</h5>
                     <h6>Total Ventes</h6>
                 </div>
             </div>
@@ -107,7 +107,7 @@
                     <span><img src="{{ asset('assets/img/icons/dash2.svg') }}" alt="img"></span>
                 </div>
                 <div class="dash-widgetcontent">
-                    <h5><span class="counters" data-count="{{ $gains }}">{{ numberDelimiter($gains) }}</span> FG</h5>
+                    <h5><span class="counters" data-count="{{ $gains }}">{{ numberDelimiter($gains) }}</span> GNF</h5>
                     <h6>Total gains</h6>
                 </div>
             </div>
@@ -119,7 +119,7 @@
                     <span><img src="{{ asset('assets/img/icons/dash2.svg') }}" alt="img"></span>
                 </div>
                 <div class="dash-widgetcontent">
-                    <h5><span class="counters" data-count="{{ $total_expenses }}">{{ numberDelimiter($total_expenses) }}</span> FG</h5>
+                    <h5><span class="counters" data-count="{{ $total_expenses }}">{{ numberDelimiter($total_expenses) }}</span> GNF</h5>
                     <h6>Total dépenses</h6>
                 </div>
             </div>
@@ -232,7 +232,7 @@
                                         </a>
                                         <a href="#">{{ $item->product->libelle }}</a>
                                     </td>
-                                    <td>{{ numberDelimiter($item->price) }} FG</td>
+                                    <td>{{ numberDelimiter($item->price) }} GNF</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -340,7 +340,7 @@
                             yAxisID: 'y'
                         },
                         {
-                            label: 'Chiffre d\'affaires (FCFA)',
+                            label: 'Chiffre d\'affaires (GNF)',
                             data: revenues,
                             backgroundColor: 'rgba(75, 192, 192, 0.5)',
                             borderColor: 'rgba(75, 192, 192, 1)',
@@ -380,7 +380,7 @@
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Chiffre d\'affaires (FCFA)'
+                                text: 'Chiffre d\'affaires (GNF)'
                             },
                             position: 'right',
                             grid: {
@@ -419,9 +419,9 @@
                                 <a href="">{{ $item->produit }}</a>
                             </td>
                             <td>{{ $item->quantity }}</td>
-                            <td>{{ numberDelimiter($item->price) }} FG</td>
-                            <td>{{ numberDelimiter($item->prixTotal) }} FG</td>
-                            <td>{{ $item->updated_at }} FG</td>
+                            <td>{{ numberDelimiter($item->price) }} GNF</td>
+                            <td>{{ numberDelimiter($item->prixTotal) }} GNF</td>
+                            <td>{{ $item->updated_at }} GNF</td>
                         </tr>
                         @endforeach
                     </tbody>

@@ -43,17 +43,21 @@
                                                             <td style="padding:5px;vertical-align:top;text-align:left;padding-bottom:20px">
                                                                 <font style="vertical-align: inherit;margin-bottom:25px;"><font style="vertical-align: inherit;font-size:14px;color:#7367F0;font-weight:600;line-height: 35px; ">Informations Boutique</font></font><br>
 
-                                                                <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"><img src="{{ asset('companies/'.App\Models\Company::latest()->first()->logo) }}" alt="img" class="me-2" style="width:40px;height:40px;">{{ App\Models\Company::latest()->first()->name }}
+                                                                @php $company = App\Models\Company::latest()->first(); @endphp
+                                                                <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;">
+                                                                    @if($company)
+                                                                        <img src="{{ asset('companies/'.$company->logo) }}" alt="img" class="me-2" style="width:40px;height:40px;">{{ $company->name }}
+                                                                    @endif
                                                                     </font></font><br>
                                                                 <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3a4d5b565117535417594f494e55575f487a5f425b574a565f14595557">{{ $user->email }}</a></font></font><br>
                                                                 <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"> {{ $user->phone }}</font></font><br>
                                                             </td>
                                                             <td style="padding:5px;vertical-align:top;text-align:left;padding-bottom:20px">
                                                                 <font style="vertical-align: inherit;margin-bottom:25px;"><font style="vertical-align: inherit;font-size:14px;color:#7367F0;font-weight:600;line-height: 35px; ">Informations Client</font></font><br>
-                                                                <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"> {{ $customer->customerName }}</font></font><br>
-                                                                <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3a4d5b565117535417594f494e55575f487a5f425b574a565f14595557">{{ $customer->email }}</a></font></font><br>
-                                                                <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"> {{ $customer->tel }}</font></font><br>
-                                                                <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"> {{ $customer->address }}</font></font><br>
+                                                                <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"> {{ $customer->customerName ?? '—' }}</font></font><br>
+                                                                <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"> {{ $customer->email ?? '' }}</font></font><br>
+                                                                <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"> {{ $customer->tel ?? '' }}</font></font><br>
+                                                                <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"> {{ $customer->address ?? '' }}</font></font><br>
                                                             </td>
 
                                                             <td style="padding:5px;vertical-align:top;text-align:left;padding-bottom:20px">
@@ -105,10 +109,10 @@
                                                 {{ $item->quantity }}
                                             </td>
                                             <td style="padding: 10px;vertical-align: top; ">
-                                                {{ $item->prix }} FG
+                                                {{ number_format($item->prix, 0, ',', ' ') }} GNF
                                             </td>
                                             <td style="padding: 10px;vertical-align: top; ">
-                                                {{ $item->prixTotal }} FG
+                                                {{ number_format($item->prixTotal, 0, ',', ' ') }} GNF
                                             </td>
                                         </tr>
                                         @endforeach
@@ -131,7 +135,7 @@
                                             <ul>
                                                 <li class="total">
                                                     <h4>Grand Total</h4>
-                                                    <h5>{{ $laFacture->montant_total }} FG</h5>
+                                                    <h5>{{ number_format($laFacture->montant_total, 0, ',', ' ') }} GNF</h5>
                                                 </li>
                                                 <br>
                                                 @php
@@ -141,7 +145,7 @@
                                                 @foreach ($paiements as $item)
                                                 <li class="total">
                                                     <h4>Paiement {{ $i }} : {{ $item->created_at }}</h4>
-                                                    <h5>{{ $item->versement }} FG</h5>
+                                                    <h5>{{ number_format($item->versement, 0, ',', ' ') }} GNF</h5>
                                                 </li>
                                                 @php
                                                     $i++;
@@ -150,11 +154,11 @@
                                                 @endforeach
                                                 <li class="total">
                                                     <h4>Total Paid</h4>
-                                                    <h5>{{ $total_paid }} FG</h5>
+                                                    <h5>{{ number_format($total_paid, 0, ',', ' ') }} GNF</h5>
                                                 </li>
                                                 <li class="total">
                                                     <h4>Reste</h4>
-                                                    <h5>{{ $laFacture->reste }} FG</h5>
+                                                    <h5>{{ number_format($laFacture->reste, 0, ',', ' ') }} GNF</h5>
                                                 </li>
                                             </ul>
                                         </div>
