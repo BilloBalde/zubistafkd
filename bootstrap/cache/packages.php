@@ -11,6 +11,13 @@
       0 => 'Barryvdh\\DomPDF\\ServiceProvider',
     ),
   ),
+  'behzadhosseinpoor/laravel-database-manager' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'BehzadHosseinPoor\\DatabaseManager\\DatabaseManagerServiceProvider',
+    ),
+  ),
   'laravel/sail' => 
   array (
     'providers' => 

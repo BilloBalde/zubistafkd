@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0ff2a5b9f1a571f568785bd16d041fd3",
+    "content-hash": "ff87a3e5b92dfc58e6824301ecdc3578",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -82,6 +82,63 @@
                 }
             ],
             "time": "2024-04-25T13:16:04+00:00"
+        },
+        {
+            "name": "behzadhosseinpoor/laravel-database-manager",
+            "version": "v1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/behzadhosseinpoor/laravel-database-manager.git",
+                "reference": "26d8dd64a6acdb474f825bafc5fe7d17f94034b8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/behzadhosseinpoor/laravel-database-manager/zipball/26d8dd64a6acdb474f825bafc5fe7d17f94034b8",
+                "reference": "26d8dd64a6acdb474f825bafc5fe7d17f94034b8",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": "^8.37|^9.0|^10.0|^11.0|^12.0",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^6.47.1|^7.55|^8.36|^9.15|^10.8"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "BehzadHosseinPoor\\DatabaseManager\\DatabaseManagerServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "BehzadHosseinPoor\\DatabaseManager\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Behzad HosseinPoor",
+                    "email": "behzad.hp@yahoo.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A Laravel package for managing MySQL, SQL Server and SQLite databases using Livewire.",
+            "homepage": "https://github.com/behzadhosseinpoor/laravel-database-manager",
+            "keywords": [
+                "behzadhosseinpoor",
+                "laravel-database-manager"
+            ],
+            "support": {
+                "issues": "https://github.com/behzadhosseinpoor/laravel-database-manager/issues",
+                "source": "https://github.com/behzadhosseinpoor/laravel-database-manager/tree/v1.1.1"
+            },
+            "time": "2025-12-13T07:54:20+00:00"
         },
         {
             "name": "brick/math",
