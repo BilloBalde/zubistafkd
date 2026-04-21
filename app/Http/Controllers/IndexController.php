@@ -37,8 +37,8 @@ class IndexController extends Controller
             ->with('product')
             ->select(
                 'product_id', 
-                DB::raw('SUM("quantity") as total_quantity'),
-                DB::raw('SUM("prixtotal") as total_revenue')
+                DB::raw('SUM(quantity) as total_quantity'),
+                DB::raw('SUM(prixtotal) as total_revenue')
                 
             )
             ->groupBy('product_id')
