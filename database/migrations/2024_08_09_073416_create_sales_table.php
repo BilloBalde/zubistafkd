@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreignId('store_id')->constrained('stores')->restrictOnDelete();
             $table->integer('quantity');
             $table->float('prix', 20, 2);
-            $table->float('prixTotal', 20, 2);
+            $table->float('prixtotal', 20, 2);
             $table->float('interet', 20, 2);
             $table->timestamps();
         });
