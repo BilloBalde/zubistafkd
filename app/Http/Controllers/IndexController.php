@@ -36,10 +36,10 @@ class IndexController extends Controller
         $topProducts = Sale::where('store_id', $store_id)
             ->with('product')
             ->select(
-                'product_id', 
+                'product_id',
                 DB::raw('SUM(quantity) as total_quantity'),
-                DB::raw('SUM(prixtotal) as total_revenue')
-                
+                DB::raw('SUM("prixTotal") as total_revenue')
+
             )
             ->groupBy('product_id')
             ->orderBy('total_revenue', 'DESC')
@@ -69,14 +69,14 @@ class IndexController extends Controller
             ->get();
             $salesData = DB::table('sales')
                 ->where('store_id', $store_id)
-                ->select(DB::raw('SUM(quantity) as total'), DB::raw('MONTH(created_at) as month'))
+                ->select(DB::raw('SUM(quantity) as total'), DB::raw('EXTRACT(MONTH FROM created_at) as month'))
                 ->groupBy('month')
                 ->pluck('total', 'month')
                 ->toArray();
 
             $purchasesData = DB::table('purchases')
                 ->where('store_id', $store_id)
-                ->select(DB::raw('SUM(quantity) as total'), DB::raw('MONTH(created_at) as month'))
+                ->select(DB::raw('SUM(quantity) as total'), DB::raw('EXTRACT(MONTH FROM created_at) as month'))
                 ->groupBy('month')
                 ->pluck('total', 'month')
                 ->toArray();
@@ -97,9 +97,9 @@ class IndexController extends Controller
              // Produits les plus vendus (tous stores)
           $topProducts = Sale::with('product')
             ->select(
-                'product_id', 
+                'product_id',
                 DB::raw('SUM(quantity) as total_quantity'),
-                DB::raw('SUM(prixtotal) as total_revenue')
+                DB::raw('SUM("prixTotal") as total_revenue')
             )
             ->groupBy('product_id')
             ->orderBy('total_revenue', 'DESC')
@@ -122,13 +122,13 @@ class IndexController extends Controller
             ->take(5)
             ->get();
             $salesData = DB::table('sales')
-                ->select(DB::raw('SUM(quantity) as total'), DB::raw('MONTH(created_at) as month'))
+                ->select(DB::raw('SUM(quantity) as total'), DB::raw('EXTRACT(MONTH FROM created_at) as month'))
                 ->groupBy('month')
                 ->pluck('total', 'month')
                 ->toArray();
 
             $purchasesData = DB::table('purchases')
-                ->select(DB::raw('SUM(quantity) as total'), DB::raw('MONTH(created_at) as month'))
+                ->select(DB::raw('SUM(quantity) as total'), DB::raw('EXTRACT(MONTH FROM created_at) as month'))
                 ->groupBy('month')
                 ->pluck('total', 'month')
                 ->toArray();
