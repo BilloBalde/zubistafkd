@@ -11,12 +11,10 @@ class Purchase extends Model
     protected $guarded = ['id'];
 
     public function getProductLibelleAttribute(){
-        $product = Product::find($this->product_id);
-        return $product->libelle;
+        return $this->product?->libelle ?? '';
     }
     public function getProductImageAttribute(){
-        $product = Product::find($this->product_id);
-        return $product->image;
+        return $this->product?->image ?? '';
     }
 
     public function product()

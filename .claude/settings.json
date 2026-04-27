@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(php -l app/Http/Controllers/SaleController.php)",
+      "Bash(php -l app/Http/Controllers/PurchaseController.php)",
+      "Bash(php -l app/Http/Controllers/PaymentController.php)",
+      "Bash(php -l app/Http/Controllers/Admin/OrderManagementController.php)",
+      "Bash(php -l app/Http/Controllers/Ecommerce/OrderController.php)",
+      "Bash(xargs php *)",
+      "Bash(curl -s -o /dev/null -w \"GET / → %{http_code}\\\\n\" http://127.0.0.1:8001/)",
+      "Bash(curl -s -o /dev/null -w \"GET /catalogue → %{http_code}\\\\n\" http://127.0.0.1:8001/catalogue)",
+      "Bash(curl -s -o /dev/null -w \"GET /about → %{http_code}\\\\n\" http://127.0.0.1:8001/about)",
+      "Bash(curl -s -o /dev/null -w \"GET /contact → %{http_code}\\\\n\" http://127.0.0.1:8001/contact)",
+      "Bash(curl -s -o /dev/null -w \"GET /login → %{http_code}\\\\n\" http://127.0.0.1:8001/login)",
+      "Bash(curl -s -o /dev/null -w \"GET / → %{http_code}\\\\n\" http://127.0.0.1:8002/)",
+      "Bash(curl -s -o /dev/null -w \"GET /about → %{http_code}\\\\n\" http://127.0.0.1:8002/about)",
+      "Bash(curl -s -o /dev/null -w \"GET /product → %{http_code}\\\\n\" http://127.0.0.1:8002/product)",
+      "Bash(curl -s -o /dev/null -w \"GET /contact → %{http_code}\\\\n\" http://127.0.0.1:8002/contact)",
+      "Bash(curl -s -o /dev/null -w \"GET /catalogue → %{http_code}\\\\n\" http://127.0.0.1:8002/catalogue)",
+      "Bash(curl -s -o /dev/null -w \"GET / → %{http_code}\\\\n\" http://127.0.0.1:8003/)",
+      "Bash(curl -s -o /dev/null -w \"GET /about → %{http_code}\\\\n\" http://127.0.0.1:8003/about)",
+      "Bash(curl -s -o /dev/null -w \"GET /product → %{http_code}\\\\n\" http://127.0.0.1:8003/product)",
+      "Bash(curl -s -o /dev/null -w \"GET /contact → %{http_code}\\\\n\" http://127.0.0.1:8003/contact)",
+      "Bash(curl -s -o /dev/null -w \"GET /catalogue → %{http_code}\\\\n\" http://127.0.0.1:8003/catalogue)",
+      "Bash(php -r ' *)"
+    ]
+  }
+}

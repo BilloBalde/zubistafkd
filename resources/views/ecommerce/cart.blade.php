@@ -74,7 +74,7 @@
                         <a href="{{ route('otp.login') }}" class="mt-2 inline-block text-amber-600 font-medium hover:underline">Espace client</a>
                     @endif
                 @else
-                    <a href="{{ route('otp.login') }}" class="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold shadow-md hover:opacity-95 transition">
+                    <a href="{{ route('otp.login') }}?redirect=checkout" class="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold shadow-md hover:opacity-95 transition">
                         Se connecter pour commander
                     </a>
                 @endauth

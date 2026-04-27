@@ -12,8 +12,9 @@ class Facture extends Model
     protected $guarded = ['id'];
 
     public function getCustomerNameAttribute(){
-        $client = Customer::find($this->customer_id);
-        return $client ? $client->customerName . '-' . $client->mark : 'Client inconnu';
+        return $this->customer
+            ? $this->customer->customerName . '-' . $this->customer->mark
+            : 'Client inconnu';
     }
 
     public function store(){
@@ -31,10 +32,9 @@ class Facture extends Model
     public function paiements() {
         return $this->hasMany(Payment::class);
     }
-    
-    // app/Models/Sale.php
-    public function facture()
+
+    public function order()
     {
-        return $this->hasOne(Facture::class, 'numero_facture', 'numeroFacture');
+        return $this->belongsTo(Order::class, 'numero_facture', 'invoice_number');
     }
 }

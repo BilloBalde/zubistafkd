@@ -115,8 +115,7 @@ class PaymentController extends Controller
                     ]);
                 } else {
                     // Montant trop élevé
-                    session(['success' => 'Le montant versé dépasse le reste à payer.']);
-                    return redirect()->route('factures.index');
+                    return redirect()->back()->with('error', 'Le montant versé dépasse le reste à payer.');
                 }
         
                 // Mise à jour du statut de la facture

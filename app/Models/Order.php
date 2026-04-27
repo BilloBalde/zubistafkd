@@ -8,7 +8,8 @@ use App\Models\Facture;
 class Order extends Model
 {
     protected $fillable = [
-        'user_id', 'delivery_address_id', 'total_amount', 'status', 'payment_method', 'payment_status', 'transaction_id', 'invoice_number'
+        'user_id', 'delivery_address_id', 'total_amount', 'status', 'payment_method',
+        'payment_status', 'transaction_id', 'invoice_number', 'store_id',
     ];
 
     public function user()

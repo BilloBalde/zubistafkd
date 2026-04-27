@@ -28,8 +28,14 @@
                         <li><a href="{{ route('sales.index') }}">Vente List</a></li>
                         <li><a href="{{ route('factures.index') }}">Facture List</a></li>
                         <li><a href="{{ route('payments.index') }}">Paiement List</a></li>
+                  </ul>
+                </li>
+                <li class="submenu">
+                    <a  class="{{ isActiveRoute(['admin.orders.index', 'admin.orders.confirmed', 'admin.orders.factures']) }}" href="javascript:void(0);"><img src="{{ asset('assets/img/icons/order.svg') }}" alt="img"><span> Commandes</span> <span class="menu-arrow"></span></a>
+                    <ul>
                         <li><a href="{{ route('admin.orders.index') }}">Commandes à valider</a></li>
-                        <li><a href="{{ route('admin.orders.confirmed') }}">Ventes confirmées</a></li>
+                        <li><a href="{{ route('admin.orders.confirmed') }}">Commandes confirmées</a></li>
+                        <li><a href="{{ route('admin.orders.factures') }}">Factures e-commerce</a></li>
                     </ul>
                 </li>
                 <li class="submenu">

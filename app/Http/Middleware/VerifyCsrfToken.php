@@ -12,6 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        // Le webhook Orange Money est appelé par leurs serveurs, pas depuis un navigateur
+        'payment/webhook',
     ];
 }

@@ -84,16 +84,19 @@ public function store(Request $request)
     ]);
 
     foreach ($purchasesData as $data) {
-
-        // ✅ garantit une valeur pour description
         $data['description'] = $data['description'] ?? null;
+        $qty = (int) $data['quantity'];
 
         Purchase::create($data);
 
+        // Stock par boutique
         StoreProduct::firstOrCreate(
             ['store_id' => $data['store_id'], 'product_id' => $data['product_id']],
             ['quantity' => 0]
-        )->increment('quantity', (int) $data['quantity']);
+        )->increment('quantity', $qty);
+
+        // Stock global synchronisé
+        Product::where('id', $data['product_id'])->increment('pcs', $qty);
     }
 
     return redirect()->route('purchases.index')
@@ -178,28 +181,29 @@ public function store(Request $request)
         $newStoreId = $request->store_id;
         $newQuantity = $request->quantity;
 
-        // 🎯 Si le produit ou le store a changé, ajuster les anciennes valeurs
+        // 🎯 Si le produit ou le store a changé, ajuster les stocks
         if ($oldProductId != $newProductId || $oldStoreId != $newStoreId) {
-            // 1. Déduire l'ancienne quantité du stock précédent
+            // Déduire l'ancienne quantité du stock précédent (boutique + global)
             StoreProduct::where('store_id', $oldStoreId)
                 ->where('product_id', $oldProductId)
-                ->update([
-                    'quantity' => DB::raw("GREATEST(quantity - $oldQuantity, 0)")
-                ]);
+                ->update(['quantity' => DB::raw("GREATEST(quantity - {$oldQuantity}, 0)")]);
+            Product::where('id', $oldProductId)
+                ->update(['pcs' => DB::raw("GREATEST(pcs - {$oldQuantity}, 0)")]);
 
-            // 2. Ajouter la nouvelle quantité dans le nouveau store + produit
+            // Ajouter la nouvelle quantité (boutique + global)
             StoreProduct::updateOrCreate(
                 ['store_id' => $newStoreId, 'product_id' => $newProductId],
-                ['quantity' => DB::raw("quantity + $newQuantity")]
+                ['quantity' => DB::raw("quantity + {$newQuantity}")]
             );
+            Product::where('id', $newProductId)->increment('pcs', $newQuantity);
         } else {
-            // 🎯 Sinon, mettre à jour en ajoutant la différence
+            // Sinon, appliquer uniquement la différence (boutique + global)
             $diff = $newQuantity - $oldQuantity;
             StoreProduct::where('store_id', $oldStoreId)
                 ->where('product_id', $oldProductId)
-                ->update([
-                    'quantity' => DB::raw("quantity + ($diff)")
-                ]);
+                ->update(['quantity' => DB::raw("quantity + ({$diff})")]);
+            Product::where('id', $oldProductId)
+                ->update(['pcs' => DB::raw("GREATEST(pcs + ({$diff}), 0)")]);
         }
 
         // 🎯 Mettre à jour la logistique liée
@@ -244,21 +248,23 @@ public function store(Request $request)
         $oldStoreId = $purchase->store_id;
         $oldQuantity = $purchase->quantity;
 
-        // 🎯 1. Déduire la quantité du stock dans le store + produit associé
+        // 🎯 1. Déduire la quantité du stock par boutique
         StoreProduct::where('store_id', $oldStoreId)
             ->where('product_id', $oldProductId)
-            ->update([
-                'quantity' => DB::raw("GREATEST(quantity - $oldQuantity, 0)")
-            ]);
+            ->update(['quantity' => DB::raw("GREATEST(quantity - {$oldQuantity}, 0)")]);
 
-        // 🎯 2. Réduire la quantité dans la logistique associée
+        // 🎯 2. Déduire du stock global
+        Product::where('id', $oldProductId)
+            ->update(['pcs' => DB::raw("GREATEST(pcs - {$oldQuantity}, 0)")]);
+
+        // 🎯 3. Réduire dans la logistique si elle existe
         $logistic = Logistic::where('numeroPurchase', $purchase->numeroPurchase)->first();
         if ($logistic) {
             $logistic->quantity -= $oldQuantity;
             $logistic->save();
         }
 
-        // 🎯 3. Supprimer l'achat
+        // 🎯 4. Supprimer l'achat
         $purchase->delete();
 
         DB::commit();

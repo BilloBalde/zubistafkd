@@ -13,85 +13,85 @@
                 <div class="content">
                     <div class="page-header">
                         <div class="page-title">
-                            <h4>Emballage Category List</h4>
-                            <h6>Gerer Votre Emballage Category</h6>
+                            <h4>Liste des Catégories</h4>
+                            <h6>{{ $grouped->count() }} groupes · {{ $grouped->flatten()->count() }} sous-catégories</h6>
                         </div>
                         <div class="page-btn">
-                            <a href="{{ route('categories.create') }}" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-2">Ajouter une Category</a>
+                            <a href="{{ route('categories.create') }}" class="btn btn-added">
+                                <img src="assets/img/icons/plus.svg" alt="img" class="me-2">Ajouter une Catégorie
+                            </a>
                         </div>
                     </div>
-                    @include('layouts.flash')
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="table-top">
-                                <div class="search-set">
 
-                                    <div class="search-input">
-                                        <a class="btn btn-searchset"><img src="assets/img/icons/search-white.svg" alt="img"></a>
-                                    </div>
+                    @include('layouts.flash')
+
+                    @foreach($grouped as $type => $items)
+                    <div class="card mb-3">
+                        <div class="card-header d-flex align-items-center justify-content-between py-2 px-3"
+                             style="background:#f8f9fa;border-bottom:2px solid #e9ecef;cursor:pointer;"
+                             data-bs-toggle="collapse"
+                             data-bs-target="#group-{{ Str::slug($type) }}"
+                             aria-expanded="true">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-warning text-dark fw-bold" style="font-size:13px;">
+                                    {{ $type }}
+                                </span>
+                                <span class="text-muted small">{{ $items->count() }} sous-catégorie{{ $items->count() > 1 ? 's' : '' }}</span>
+                            </div>
+                            <i class="fas fa-chevron-down text-muted small"></i>
+                        </div>
+                        <div class="collapse show" id="group-{{ Str::slug($type) }}">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr style="background:#fff;">
+                                                <th class="ps-3">Identifiant</th>
+                                                <th>Description</th>
+                                                <th class="text-end pe-3">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($items as $cat)
+                                            <tr>
+                                                <td class="ps-3">
+                                                    <span class="fw-semibold text-secondary">{{ $cat->slug }}</span>
+                                                </td>
+                                                <td>{{ $cat->description }}</td>
+                                                <td class="text-end pe-3">
+                                                    <a class="me-3" href="{{ route('categories.edit', $cat->id) }}" title="Modifier">
+                                                        <img src="assets/img/icons/edit.svg" alt="modifier">
+                                                    </a>
+                                                    <a class="me-1 deleteButtionItem"
+                                                        type="button"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#confirmDeleteModal"
+                                                        data-slug="{{ $cat->slug }}"
+                                                        data-action="{{ route('categories.destroy', $cat->id) }}">
+                                                        <img src="assets/img/icons/delete.svg" alt="supprimer">
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-
-                            <div class="table-responsive">
-                                <table class="table  datanew">
-                                    <thead>
-                                        <tr>
-                                            <th>Identifiant</th>
-                                            <th>Type Categorie</th>
-                                            <th>Description</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($categories as $categoryEmballage)
-                                        <tr>
-                                            <td>{{ $categoryEmballage->slug }}</td>
-                                            <td>{{ $categoryEmballage->category_type }}</td>
-                                            <td>{{ $categoryEmballage->description }}</td>
-                                            <td>
-                                                <a class="me-3" href="{{ route('categories.edit', $categoryEmballage->id) }}">
-                                                    <img src="assets/img/icons/edit.svg" alt="img">
-                                                </a>
-                                                <a
-                                                    type="button"
-                                                    class="me-3 deleteButtionItem"
-                                                    data-bs-toggle="modal"
-                                                    data-slug="{{ $categoryEmballage->slug }}"
-                                                    data-bs-target="#confirmDeleteModal"
-                                                    onclick="setDeleteFormAction('{{ route('categories.destroy', $categoryEmballage->id) }}')">
-                                                    <img src="assets/img/icons/delete.svg" class="me-2" alt="img">
-                                                </a>
-                                                {{-- <a class="me-3" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ $categoryEmballage->id }}"><img src="assets/img/icons/delete.svg" alt="img"></a> --}}
-                                            </td>
-                                        </tr>
-                                        @endforeach
-
-                                    </tbody>
-                                </table>
-                            </div>
                         </div>
                     </div>
+                    @endforeach
+
                 </div>
             </div>
         </div>
+
         @include('layouts.scripts')
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                // Add event listener for all buttons with the class "dropdown-item"
-                const deleteButtons = document.querySelectorAll('.deleteButtionItem');
-
-                deleteButtons.forEach(button => {
-                    button.addEventListener('click', function () {
-                        // Get the data-id from the clicked button
-                        const dataId = this.getAttribute('data-slug');
-
-                        // Set the ID in the modal (in the span with id 'deleteId')
-                        document.getElementById('deleteId').textContent = dataId;
-
-                        // Update the form action dynamically
-                        const form = document.getElementById('deleteForm');
-                        const deleteAction = this.getAttribute('onclick').match(/'(.*?)'/)[1]; // Extract the URL
-                        form.setAttribute('action', deleteAction);
+                document.querySelectorAll('.deleteButtionItem').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        document.getElementById('deleteId').textContent = this.dataset.slug;
+                        document.getElementById('deleteForm').action = this.dataset.action;
                     });
                 });
             });

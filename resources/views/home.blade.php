@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>FBK-Printing - Révélez votre éclat naturel</title>
+    <title>FBK-Printing - Spécialiste Matériaux d'Impression en Guinée</title>
 
     {{-- Tailwind CSS CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,28 +20,120 @@
 
         /* ── Hero ── */
         .hero-section {
-            background: linear-gradient(135deg, #f5a962 0%, #f18d5c 50%, #d4753c 100%);
-            min-height: 600px;
+            background: linear-gradient(135deg, #1a0a00 0%, #3d1a00 40%, #6b3200 70%, #d4753c 100%);
+            min-height: 620px;
             position: relative;
             overflow: hidden;
         }
         .hero-section::before {
             content: '';
-            position: absolute; top: 0; right: 0;
-            width: 500px; height: 500px;
-            background: rgba(255,255,255,0.1);
+            position: absolute; top: -80px; right: -80px;
+            width: 520px; height: 520px;
+            background: radial-gradient(circle, rgba(245,169,98,0.18) 0%, transparent 70%);
             border-radius: 50%;
-            transform: translate(100px,-50px);
         }
         .hero-section::after {
             content: '';
-            position: absolute; bottom: 0; left: 0;
-            width: 400px; height: 400px;
-            background: rgba(255,255,255,0.08);
+            position: absolute; bottom: -100px; left: -100px;
+            width: 450px; height: 450px;
+            background: radial-gradient(circle, rgba(212,117,60,0.15) 0%, transparent 70%);
             border-radius: 50%;
-            transform: translate(-100px,100px);
         }
         .hero-content { position: relative; z-index: 10; }
+
+        /* ── Hero Carousel ── */
+        .hero-carousel {
+            position: relative;
+            width: 100%;
+            height: 420px;
+        }
+        .hero-slide {
+            position: absolute; inset: 0;
+            opacity: 0;
+            transition: opacity 0.7s ease, transform 0.7s ease;
+            transform: translateX(40px) scale(0.97);
+        }
+        .hero-slide.active {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+        .hero-slide.exit {
+            opacity: 0;
+            transform: translateX(-40px) scale(0.97);
+        }
+        .hero-slide img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            border-radius: 1.5rem;
+        }
+        .hero-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .hero-dot.active {
+            width: 28px;
+            border-radius: 4px;
+            background: #fff;
+        }
+        .hero-badge {
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 999px;
+            padding: 6px 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .hero-stat {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 1rem;
+            padding: 12px 20px;
+            text-align: center;
+        }
+        .carousel-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 36px; height: 36px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; cursor: pointer;
+            transition: background 0.3s;
+            z-index: 20;
+        }
+        .carousel-arrow:hover { background: rgba(255,255,255,0.28); }
+        .carousel-arrow.prev { left: 8px; }
+        .carousel-arrow.next { right: 8px; }
+        .floating-card {
+            position: absolute;
+            background: rgba(255,255,255,0.95);
+            border-radius: 1rem;
+            padding: 10px 14px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            display: flex; align-items: center; gap: 10px;
+            min-width: 140px;
+            animation: floatY 3s ease-in-out infinite;
+        }
+        .floating-card.card-top { top: 16px; right: -16px; animation-delay: 0s; }
+        .floating-card.card-bot { bottom: 24px; left: -16px; animation-delay: 1.5s; }
+        @keyframes floatY {
+            0%,100% { transform: translateY(0); }
+            50%      { transform: translateY(-8px); }
+        }
+        @media (max-width: 768px) {
+            .floating-card { display: none; }
+            .hero-carousel { height: 280px; }
+        }
 
         /* ── Misc helpers ── */
         .gradient-text {
@@ -93,28 +185,46 @@
         /* Grille catégories */
         .cat-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
         }
+        @media (max-width: 1024px) { .cat-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 768px)  { .cat-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 480px)  { .cat-grid { grid-template-columns: repeat(2, 1fr); } }
         .cat-card {
             background: #fff; border: 1.5px solid #f3f4f6;
-            border-radius: 16px; padding: 1.5rem 1rem;
+            border-radius: 20px; overflow: hidden;
             text-align: center; cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.25s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
         .cat-card:hover {
             border-color: #f59e0b;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(245,158,11,0.12);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(245,158,11,0.15);
+        }
+        .cat-img-wrap {
+            width: 100%; height: 140px;
+            overflow: hidden; position: relative;
+            background: #fafafa;
+        }
+        .cat-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .cat-card:hover .cat-img-wrap img { transform: scale(1.06); }
+        .cat-icon-wrap {
+            width: 100%; height: 140px;
+            display: flex; align-items: center; justify-content: center;
         }
         .cat-icon {
-            width: 56px; height: 56px; border-radius: 50%;
-            margin: 0 auto 12px;
+            width: 70px; height: 70px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 24px;
+            font-size: 28px;
         }
-        .cat-name { font-size: 13px; font-weight: 600; color: #1f2937; }
-        .cat-count { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+        .cat-body { padding: 12px 10px 16px; }
+        .cat-name { font-size: 13px; font-weight: 700; color: #1f2937; }
+        .cat-count { font-size: 11px; color: #9ca3af; margin-top: 4px; }
 
         /* Layout liste produits + sidebar */
         .products-layout {
@@ -159,6 +269,10 @@
             background: #f3f4f6; color: #6b7280;
             padding: 1px 8px; border-radius: 20px;
         }
+        .filter-scroll::-webkit-scrollbar { width: 4px; }
+        .filter-scroll::-webkit-scrollbar-track { background: #f3f4f6; border-radius: 4px; }
+        .filter-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        .filter-scroll::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
         .price-inputs { display: flex; gap: 8px; align-items: center; }
         .price-inputs input {
             width: 72px; padding: 6px 10px; font-size: 12px;
@@ -195,60 +309,71 @@
 
         .prod-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
         }
+        @media (max-width: 1024px) { .prod-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 768px)  { .prod-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 480px)  { .prod-grid { grid-template-columns: repeat(2, 1fr); } }
         .prod-card {
             background: #fff; border: 1.5px solid #f3f4f6;
-            border-radius: 16px; overflow: hidden;
-            transition: all 0.2s; cursor: pointer;
+            border-radius: 20px; overflow: hidden;
+            transition: all 0.25s; cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
         .prod-card:hover {
             border-color: #f59e0b;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(245,158,11,0.12);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(245,158,11,0.15);
         }
         .prod-img {
-            height: 130px; display: flex; align-items: center;
+            height: 180px; display: flex; align-items: center;
             justify-content: center; position: relative;
             background: #fafafa;
             overflow: hidden;
         }
-        .prod-img img { width: 100%; height: 100%; object-fit: cover; }
-        .prod-img .no-img { font-size: 40px; }
+        .prod-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .prod-card:hover .prod-img img { transform: scale(1.05); }
+        .prod-img .no-img { font-size: 48px; }
         .prod-badge {
             position: absolute; top: 10px; left: 10px;
             font-size: 10px; font-weight: 700;
-            padding: 3px 9px; border-radius: 20px;
+            padding: 4px 10px; border-radius: 20px;
+            backdrop-filter: blur(4px);
         }
-        .badge-promo { background: #fef3c7; color: #92400e; }
-        .badge-best { background: #d1fae5; color: #065f46; }
+        .badge-promo { background: rgba(254,243,199,0.95); color: #92400e; }
+        .badge-best { background: rgba(209,250,229,0.95); color: #065f46; }
 
-        .prod-info { padding: 12px 14px 14px; }
+        .prod-info { padding: 14px 14px 16px; }
         .prod-name {
             font-size: 13px; font-weight: 600; color: #1f2937;
-            margin-bottom: 3px; line-height: 1.35;
+            margin-bottom: 3px; line-height: 1.4;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
-        .prod-cat-tag { font-size: 11px; color: #9ca3af; margin-bottom: 6px; }
-        .prod-stars { font-size: 12px; color: #f59e0b; margin-bottom: 6px; }
+        .prod-cat-tag {
+            font-size: 11px; color: #fff; background: #f59e0b;
+            display: inline-block; padding: 2px 8px; border-radius: 20px;
+            margin-bottom: 8px; font-weight: 500;
+        }
+        .prod-stars { font-size: 12px; color: #f59e0b; margin-bottom: 8px; }
         .prod-price-row {
             display: flex; align-items: baseline; gap: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 12px; flex-wrap: wrap;
         }
-        .prod-price { font-size: 16px; font-weight: 700; color: #d97706; }
+        .prod-price { font-size: 17px; font-weight: 700; color: #d97706; }
         .prod-price-old {
-            font-size: 11px; color: #9ca3af;
+            font-size: 12px; color: #9ca3af;
             text-decoration: line-through;
         }
         .prod-btn {
-            display: block; width: 100%; padding: 8px; font-size: 12px;
+            display: block; width: 100%; padding: 9px; font-size: 12px;
             font-weight: 600; text-align: center;
             background: linear-gradient(135deg, #f5a962, #d97706);
-            color: #fff; border: none; border-radius: 8px; cursor: pointer;
-            transition: opacity 0.2s;
+            color: #fff; border: none; border-radius: 10px; cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
             font-family: 'Poppins', sans-serif;
         }
-        .prod-btn:hover { opacity: 0.88; }
+        .prod-btn:hover { opacity: 0.88; transform: scale(1.02); }
 
         .empty-state {
             text-align: center; padding: 3rem 1rem;
@@ -266,7 +391,7 @@
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
                 <div class="flex items-center space-x-2">
-                    <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-white font-bold text-lg">F</div>
+                    <img src="{{ asset('assets/img/fbk.png') }}" alt="FBK-Printing" class="h-10 w-auto object-contain">
                     <span class="text-xl font-bold text-gray-800 hidden sm:inline">FBK-Printing</span>
                 </div>
                 <div class="hidden md:flex space-x-8">
@@ -279,10 +404,6 @@
                <div class="flex items-center space-x-4">
                     @auth
                         @if(Auth::user()->isCustomer())
-                            <a href="{{ route('shop.home') }}" class="text-gray-700 hover:text-amber-600 transition font-medium text-sm">
-                                <i class="fas fa-store text-xl"></i>
-                                <span class="hidden sm:inline"> Ma boutique</span>
-                            </a>
                             <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-amber-600 transition font-medium text-sm">
                                 <i class="fas fa-receipt text-xl"></i>
                                 <span class="hidden sm:inline"> Mes commandes</span>
@@ -330,33 +451,133 @@
     </nav>
 
     {{-- ══════════════════════════════════════════
-        HERO (avec image produit beauté)
+        HERO — Carousel élégant
     ══════════════════════════════════════════ --}}
-    <section id="accueil" class="hero-section pt-32 pb-20">
+    <section id="accueil" class="hero-section pt-28 pb-16">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="hero-content grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-                <div>
-                    <h1 class="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
-                        Révélez votre éclat naturel
+            <div class="hero-content grid grid-cols-1 md:grid-cols-2 gap-12 items-center min-h-[500px]">
+
+                {{-- ── Côté texte ── --}}
+                <div class="flex flex-col justify-center">
+
+                    {{-- Badge --}}
+                    <div class="hero-badge mb-5 w-fit">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 inline-block animate-pulse"></span>
+                        Matériaux d'impression professionnels · Guinée
+                    </div>
+
+                    {{-- Titre --}}
+                    <h1 class="text-5xl md:text-6xl font-extrabold text-white mb-5 leading-tight tracking-tight">
+                        Votre fournisseur<br>
+                        <span style="background:linear-gradient(90deg,#f5a962,#ffd89b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">
+                            d'impression
+                        </span>
                     </h1>
-                    <p class="text-lg text-white/90 mb-8 leading-relaxed">
-                        Découvrez nos produits de beauté premium, formulés spécialement pour sublimer votre peau naturellement. Depuis Conakry, la Guinée pour le monde entier.
+
+                    {{-- Sous-titre --}}
+                    <p class="text-white/80 text-base md:text-lg mb-8 leading-relaxed max-w-md">
+                        Papiers, rouleaux, encres, presses et accessoires d'imprimantes — tout ce dont vous avez besoin pour imprimer en qualité professionnelle. De Conakry pour toute la Guinée.
                     </p>
-                    <a href="#produits" class="px-8 py-3 bg-white text-amber-600 rounded-full font-semibold transition duration-300 hover:shadow-lg hover:scale-105 inline-block">
-                        <i class="fas fa-arrow-right mr-2"></i> Découvrir
-                    </a>
-                </div>
-                <div class="flex justify-center">
-                    <div class="relative w-72 h-96 rounded-3xl overflow-hidden shadow-2xl border-2 border-white/30">
-                        {{-- Image depuis public/products/logohero.png --}}
-                        <img src="{{ asset('products/logohero.png') }}" 
-                            alt="Produits de beauté FBK" 
-                            class="w-full h-full object-cover"
-                            onerror="this.onerror=null; this.src='https://placehold.co/400x500?text=Image+beaut%C3%A9'">
-                        {{-- Léger overlay pour améliorer la lisibilité si besoin --}}
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+
+                    {{-- Boutons --}}
+                    <div class="flex flex-wrap gap-3 mb-10">
+                        <a href="#produits" class="px-7 py-3 rounded-full font-semibold text-amber-900 transition duration-300 hover:shadow-xl hover:scale-105 inline-flex items-center gap-2"
+                           style="background:linear-gradient(90deg,#f5a962,#ffd89b);">
+                            <i class="fas fa-sparkles text-sm"></i> Découvrir
+                        </a>
+                        <a href="{{ route('products.index') }}" class="px-7 py-3 rounded-full font-semibold text-white border border-white/30 hover:bg-white/10 transition duration-300 inline-flex items-center gap-2">
+                            <i class="fas fa-th-large text-sm"></i> Catalogue
+                        </a>
+                    </div>
+
+                    {{-- Stats --}}
+                    <div class="flex gap-4 flex-wrap">
+                        <div class="hero-stat">
+                            <div class="text-2xl font-bold text-amber-300">{{ $totalProducts }}+</div>
+                            <div class="text-xs text-white/70 mt-1">Produits</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="text-2xl font-bold text-amber-300">{{ $totalCategories }}</div>
+                            <div class="text-xs text-white/70 mt-1">Catégories</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="text-2xl font-bold text-amber-300">Pro</div>
+                            <div class="text-xs text-white/70 mt-1">Qualité</div>
+                        </div>
                     </div>
                 </div>
+
+                {{-- ── Côté carousel ── --}}
+                <div class="flex justify-center md:justify-end">
+                    <div class="relative" style="width:320px;">
+
+                        {{-- Carousel --}}
+                        <div class="hero-carousel shadow-2xl rounded-3xl overflow-hidden border border-white/10" id="heroCarousel">
+                            @php
+                                $heroImages = $allProducts->filter(fn($p) => !empty($p['image']))->take(6)->values();
+                                if ($heroImages->isEmpty()) {
+                                    $heroImages = collect([['image' => null, 'name' => 'FBK Printing']]);
+                                }
+                            @endphp
+                            @foreach($heroImages as $i => $prod)
+                            <div class="hero-slide {{ $i === 0 ? 'active' : '' }}" data-index="{{ $i }}">
+                                @if($prod['image'])
+                                    <img src="{{ $prod['image'] }}" alt="{{ $prod['name'] }}"
+                                         onerror="this.onerror=null;this.parentElement.style.background='linear-gradient(135deg,#f5a962,#d4753c)'">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center"
+                                         style="background:linear-gradient(135deg,#f5a962,#d4753c);">
+                                        <img src="{{ asset('assets/img/fbk.png') }}" alt="FBK" class="w-32 h-32 object-contain opacity-80">
+                                    </div>
+                                @endif
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent rounded-3xl"></div>
+                                {{-- Nom produit en bas --}}
+                                <div class="absolute bottom-4 left-4 right-4">
+                                    <span class="text-white text-sm font-semibold bg-black/30 backdrop-blur px-3 py-1 rounded-full">
+                                        {{ $prod['name'] }}
+                                    </span>
+                                </div>
+                            </div>
+                            @endforeach
+
+                            {{-- Flèches --}}
+                            <button class="carousel-arrow prev" id="heroPrev" aria-label="Précédent">
+                                <i class="fas fa-chevron-left text-xs"></i>
+                            </button>
+                            <button class="carousel-arrow next" id="heroNext" aria-label="Suivant">
+                                <i class="fas fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+
+                        {{-- Dots --}}
+                        <div class="flex justify-center gap-2 mt-4" id="heroDots">
+                            @foreach($heroImages as $i => $prod)
+                            <button class="hero-dot {{ $i === 0 ? 'active' : '' }}" data-dot="{{ $i }}" aria-label="Slide {{ $i+1 }}"></button>
+                            @endforeach
+                        </div>
+
+                        {{-- Floating cards --}}
+                        <div class="floating-card card-top">
+                            <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-print text-amber-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-gray-800">Matériaux pro</div>
+                                <div class="text-xs text-gray-500">Haute résolution</div>
+                            </div>
+                        </div>
+                        <div class="floating-card card-bot">
+                            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-truck text-green-600 text-xs"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-gray-800">Livraison rapide</div>
+                                <div class="text-xs text-gray-500">Partout en Guinée</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
@@ -373,7 +594,7 @@
                     Nos <span class="gradient-text">Produits</span>
                 </h2>
                 <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-                    Explorez notre sélection de soins beauté premium — catégories, coups de cœur et offres du moment.
+                    Explorez notre gamme de matériaux d'impression — papiers, rouleaux, encres, presses et bien plus. Qualité professionnelle, prix compétitifs.
                 </p>
             </div>
 
@@ -392,42 +613,132 @@
 
             {{-- ─── Panel : Catégories ─── --}}
             <div id="panel-categories" class="panel active">
+                @php
+                    $catIcons = [
+                        'ENCRE'           => ['icon'=>'fas fa-fill-drip',    'bg'=>'#ede9fe','color'=>'#7c3aed'],
+                        'Vinyl'           => ['icon'=>'fas fa-scroll',        'bg'=>'#d1fae5','color'=>'#059669'],
+                        'BACHES'          => ['icon'=>'fas fa-image',         'bg'=>'#e0f2fe','color'=>'#0284c7'],
+                        'FOREX'           => ['icon'=>'fas fa-layer-group',   'bg'=>'#fce7f3','color'=>'#db2777'],
+                        'Papier'          => ['icon'=>'fas fa-file-alt',      'bg'=>'#fef3c7','color'=>'#d97706'],
+                        'PAPIER'          => ['icon'=>'fas fa-file-alt',      'bg'=>'#fef3c7','color'=>'#d97706'],
+                        'AUTOCOLLANT'     => ['icon'=>'fas fa-sticky-note',   'bg'=>'#dcfce7','color'=>'#16a34a'],
+                        'FILM'            => ['icon'=>'fas fa-film',          'bg'=>'#fef9c3','color'=>'#b45309'],
+                        'MACHINE'         => ['icon'=>'fas fa-cog',           'bg'=>'#fee2e2','color'=>'#dc2626'],
+                        'PRESS'           => ['icon'=>'fas fa-compress-alt',  'bg'=>'#e0e7ff','color'=>'#4338ca'],
+                        'KIKEMONO'        => ['icon'=>'fas fa-ruler-vertical','bg'=>'#fdf4ff','color'=>'#9333ea'],
+                        'KAKIMONO'        => ['icon'=>'fas fa-ruler-vertical','bg'=>'#fdf4ff','color'=>'#9333ea'],
+                        'ALICOBON'        => ['icon'=>'fas fa-th-large',      'bg'=>'#f0fdf4','color'=>'#15803d'],
+                        'PLEXI'           => ['icon'=>'fas fa-border-all',    'bg'=>'#f0f9ff','color'=>'#0369a1'],
+                        'LED'             => ['icon'=>'fas fa-lightbulb',     'bg'=>'#fffbeb','color'=>'#d97706'],
+                        'IMPRIMENTE'      => ['icon'=>'fas fa-print',         'bg'=>'#fce7f3','color'=>'#db2777'],
+                        'LAMINATOR'       => ['icon'=>'fas fa-layer-group',   'bg'=>'#e0f2fe','color'=>'#0284c7'],
+                        'ANNEAU'          => ['icon'=>'fas fa-circle',        'bg'=>'#f5f3ff','color'=>'#7c3aed'],
+                        'DECOUPE'         => ['icon'=>'fas fa-cut',           'bg'=>'#fef2f2','color'=>'#dc2626'],
+                        'BIC'             => ['icon'=>'fas fa-pen',           'bg'=>'#f0fdf4','color'=>'#16a34a'],
+                        'CACHET'          => ['icon'=>'fas fa-stamp',         'bg'=>'#fdf4ff','color'=>'#9333ea'],
+                        'TASSE'           => ['icon'=>'fas fa-mug-hot',       'bg'=>'#fffbeb','color'=>'#f59e0b'],
+                        'POUDRE'          => ['icon'=>'fas fa-mortar-pestle', 'bg'=>'#f5f3ff','color'=>'#7c3aed'],
+                        'SUPPORT'         => ['icon'=>'fas fa-image',         'bg'=>'#fef3c7','color'=>'#d97706'],
+                        'TABLEAU'         => ['icon'=>'fas fa-photo-video',   'bg'=>'#ede9fe','color'=>'#7c3aed'],
+                        'TOTEM'           => ['icon'=>'fas fa-columns',       'bg'=>'#e0e7ff','color'=>'#4338ca'],
+                    ];
+                    $defaultIcon = ['icon'=>'fas fa-box','bg'=>'#f3f4f6','color'=>'#6b7280'];
+                @endphp
                 <div class="cat-grid">
-                    @foreach($categories as $cat)
-                    <div class="cat-card" onclick="switchTabWithFilter('best', '{{ $cat->name }}')">
-                        <div class="cat-icon" style="background:{{ $cat->bg_color ?? '#fef3c7' }};color:{{ $cat->text_color ?? '#d97706' }};">
-                            <i class="{{ $cat->icon ?? 'fas fa-box' }}"></i>
+                    @foreach($categories->sortByDesc('products_count')->take(10) as $cat)
+                    @php
+                        $ic    = $catIcons[$cat->name] ?? $defaultIcon;
+                        $icBg  = $ic['bg'];
+                        $icClr = $ic['color'];
+                        $icCls = $ic['icon'];
+                        $catNameJs = addslashes($cat->name);
+                    @endphp
+                    <div class="cat-card" onclick="switchTabWithFilter('best', '{{ $catNameJs }}')">
+                        @if($cat->image_url)
+                        <div class="cat-img-wrap">
+                            <img src="{{ $cat->image_url }}" alt="{{ $cat->name }}"
+                                 onerror="this.parentElement.outerHTML='<div class=\'cat-icon-wrap\'><div class=\'cat-icon\' style=\'background:{{ $icBg }};color:{{ $icClr }}\'><i class=\'{{ $icCls }}\'></i></div></div>'">
                         </div>
-                        <div class="cat-name">{{ $cat->name }}</div>
-                        <div class="cat-count">{{ $cat->products_count }} produits</div>
+                        @else
+                        <div class="cat-icon-wrap">
+                            <div class="cat-icon" style="background:{{ $icBg }};color:{{ $icClr }};">
+                                <i class="{{ $icCls }}"></i>
+                            </div>
+                        </div>
+                        @endif
+                        <div class="cat-body">
+                            <div class="cat-name">{{ $cat->name }}</div>
+                            <div class="cat-count">{{ $cat->products_count }} produit{{ $cat->products_count > 1 ? 's' : '' }}</div>
+                        </div>
                     </div>
                     @endforeach
+                </div>
 
-                    {{-- Fallback si pas de catégories en base : retirer ce bloc une fois la BDD peuplée --}}
-                    @if($categories->isEmpty())
-                        @php
-                            $staticCats = [
-                                ['name'=>'Soins visage','count'=>12,'icon'=>'fas fa-smile','bg'=>'#fef3c7','color'=>'#d97706'],
-                                ['name'=>'Corps','count'=>8,'icon'=>'fas fa-leaf','bg'=>'#d1fae5','color'=>'#059669'],
-                                ['name'=>'Cheveux','count'=>10,'icon'=>'fas fa-wind','bg'=>'#ede9fe','color'=>'#7c3aed'],
-                                ['name'=>'Maquillage','count'=>15,'icon'=>'fas fa-heart','bg'=>'#fce7f3','color'=>'#db2777'],
-                                ['name'=>'Parfums','count'=>6,'icon'=>'fas fa-spray-can','bg'=>'#e0f2fe','color'=>'#0284c7'],
-                                ['name'=>'Naturel & Bio','count'=>9,'icon'=>'fas fa-seedling','bg'=>'#dcfce7','color'=>'#16a34a'],
-                                ['name'=>'Huiles','count'=>7,'icon'=>'fas fa-tint','bg'=>'#fef9c3','color'=>'#b45309'],
-                                ['name'=>'Coffrets','count'=>5,'icon'=>'fas fa-gift','bg'=>'#fee2e2','color'=>'#dc2626'],
-                            ];
-                        @endphp
-                        @foreach($staticCats as $sc)
-                        <div class="cat-card" onclick="switchTabWithFilter('best', '{{ $sc['name'] }}')">
-                            <div class="cat-icon" style="background:{{ $sc['bg'] }};color:{{ $sc['color'] }};">
-                                <i class="{{ $sc['icon'] }}"></i>
+                {{-- Bouton voir toutes les catégories --}}
+                <div class="text-center mt-8">
+                    <a href="{{ route('public.categories') }}"
+                       class="inline-flex items-center gap-2 px-7 py-3 border-2 border-amber-500 text-amber-600 rounded-full font-semibold text-sm hover:bg-amber-500 hover:text-white transition duration-200">
+                        <i class="fas fa-th-large"></i>
+                        Voir toutes les catégories ({{ $totalCategories }})
+                    </a>
+                </div>
+
+                {{-- ── 10 produits en vedette ── --}}
+                @if(isset($allProducts) && count($allProducts) > 0)
+                <div class="mt-14">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-box-open text-amber-500 mr-2"></i> Nos produits
+                        <span class="text-sm font-normal text-gray-400 ml-2">({{ $totalProducts }} au total)</span>
+                    </h3>
+                    <div class="prod-grid" id="grid-all">
+                        @foreach($allProducts->take(10) as $p)
+                        <div class="prod-card" style="cursor:pointer;" onclick="window.location='{{ route('productDetail', $p['id']) }}'">
+                            <div class="prod-img">
+                                @if($p['image'])
+                                    <img src="{{ $p['image'] }}" alt="{{ $p['name'] }}"
+                                         onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='block'">
+                                    <span class="no-img" style="display:none">🧴</span>
+                                @else
+                                    <span class="no-img">🖨️</span>
+                                @endif
+                                @if($p['old_price'])
+                                    <span class="prod-badge badge-promo">-{{ $p['discount'] }}%</span>
+                                @endif
                             </div>
-                            <div class="cat-name">{{ $sc['name'] }}</div>
-                            <div class="cat-count">{{ $sc['count'] }} produits</div>
+                            <div class="prod-info">
+                                <div class="prod-cat-tag">{{ $p['category_name'] }}</div>
+                                <div class="prod-name">{{ $p['name'] }}</div>
+                                <div class="prod-stars">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        @if($i <= floor($p['rating']))★@else☆@endif
+                                    @endfor
+                                </div>
+                                <div class="prod-price-row">
+                                    <span class="prod-price">{{ number_format($p['price'], 0, ',', ' ') }} GNF</span>
+                                    @if($p['old_price'])
+                                        <span class="prod-price-old">{{ number_format($p['old_price'], 0, ',', ' ') }} GNF</span>
+                                    @endif
+                                </div>
+                                <button class="prod-btn" onclick="event.stopPropagation();addToCart({{ $p['id'] }})">
+                                    <i class="fas fa-shopping-bag mr-1"></i> Ajouter au panier
+                                </button>
+                            </div>
                         </div>
                         @endforeach
+                    </div>
+
+                    {{-- Lien vers tous les produits --}}
+                    @if($totalProducts > 10)
+                    <div class="text-center mt-8">
+                        <a href="{{ route('products.index') }}"
+                           class="inline-flex items-center gap-2 px-7 py-3 border-2 border-amber-500 text-amber-600 rounded-full font-semibold text-sm hover:bg-amber-500 hover:text-white transition duration-200">
+                            <i class="fas fa-box-open"></i>
+                            Voir tous les produits ({{ $totalProducts }})
+                        </a>
+                    </div>
                     @endif
                 </div>
+                @endif
             </div>
 
             {{-- ─── Panel : Meilleurs produits ─── --}}
@@ -440,7 +751,8 @@
 
                         <div class="filter-group">
                             <span class="filter-label">Catégories</span>
-                            @foreach($categories as $cat)
+                            <div class="filter-scroll" style="max-height:200px;overflow-y:auto;padding-right:4px;">
+                            @foreach($categories->where('products_count', '>', 0)->sortByDesc('products_count') as $cat)
                             <label class="filter-option">
                                 <input type="checkbox" class="cat-filter-best" value="{{ $cat->name }}" onchange="filterProducts('best')">
                                 <span>{{ $cat->name }}</span>
@@ -448,13 +760,14 @@
                             </label>
                             @endforeach
                             @if($categories->isEmpty())
-                                @foreach(['Soins visage','Corps','Cheveux','Maquillage','Parfums','Huiles','Naturel & Bio'] as $cn)
+                                @foreach(['Papier','Rouleaux','Encres','Cartouches','Presses','Rubans','Plastification'] as $cn)
                                 <label class="filter-option">
                                     <input type="checkbox" class="cat-filter-best" value="{{ $cn }}" onchange="filterProducts('best')">
                                     <span>{{ $cn }}</span>
                                 </label>
                                 @endforeach
                             @endif
+                            </div>
                         </div>
 
                         <hr class="filter-divider">
@@ -507,21 +820,23 @@
 
                         <div class="filter-group">
                             <span class="filter-label">Catégories</span>
-                            @foreach($categories as $cat)
+                            <div class="filter-scroll" style="max-height:200px;overflow-y:auto;padding-right:4px;">
+                            @foreach($categories->where('products_count', '>', 0)->sortByDesc('products_count') as $cat)
                             <label class="filter-option">
                                 <input type="checkbox" class="cat-filter-promo" value="{{ $cat->name }}" onchange="filterProducts('promo')">
                                 <span>{{ $cat->name }}</span>
-                                <span class="f-badge">{{ $cat->promo_count ?? '' }}</span>
+                                <span class="f-badge">{{ $cat->products_count }}</span>
                             </label>
                             @endforeach
                             @if($categories->isEmpty())
-                                @foreach(['Soins visage','Corps','Cheveux','Maquillage'] as $cn)
+                                @foreach(['Papier','Rouleaux','Encres','Cartouches'] as $cn)
                                 <label class="filter-option">
                                     <input type="checkbox" class="cat-filter-promo" value="{{ $cn }}" onchange="filterProducts('promo')">
                                     <span>{{ $cn }}</span>
                                 </label>
                                 @endforeach
                             @endif
+                            </div>
                         </div>
 
                         <hr class="filter-divider">
@@ -564,12 +879,7 @@
                 </div>
             </div>
 
-            {{-- Lien catalogue complet --}}
-            <div class="text-center mt-14">
-                <a href="{{ route('products.index') }}" class="px-10 py-4 bg-amber-600 text-white rounded-full font-semibold text-lg hover:bg-amber-700 transition duration-300 inline-block shadow-lg">
-                    <i class="fas fa-th mr-2"></i> Voir tous les produits
-                </a>
-            </div>
+          
         </div>
     </section>
 
@@ -583,24 +893,24 @@
                     Pourquoi nous <span class="gradient-text">choisir</span>
                 </h2>
                 <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-                    Trois raisons principales pour faire confiance à FBK-Printing
+                    Trois raisons principales pour faire confiance à FBK-Printing pour vos besoins en impression
                 </p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
                 <div class="text-center">
                     <div class="feature-icon"><i class="fas fa-truck"></i></div>
                     <h3 class="text-2xl font-bold text-gray-800 mb-3">Livraison Rapide</h3>
-                    <p class="text-gray-600 leading-relaxed">Livraison express partout en Guinée et à l'international en 3-5 jours ouvrables. Suivi en temps réel de votre commande.</p>
+                    <p class="text-gray-600 leading-relaxed">Livraison express partout en Guinée en 24 à 48h. Commandez vos rouleaux, papiers et encres et recevez-les directement chez vous ou à votre atelier.</p>
                 </div>
                 <div class="text-center">
-                    <div class="feature-icon"><i class="fas fa-gem"></i></div>
-                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Qualité Premium</h3>
-                    <p class="text-gray-600 leading-relaxed">Tous nos produits sont certifiés, testés dermatologiquement et fabriqués avec des ingrédients naturels de qualité premium.</p>
+                    <div class="feature-icon"><i class="fas fa-print"></i></div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Matériaux Professionnels</h3>
+                    <p class="text-gray-600 leading-relaxed">Papiers haute résolution, encres compatibles toutes marques, rouleaux thermiques et presses de qualité industrielle — tout pour des impressions nettes et durables.</p>
                 </div>
                 <div class="text-center">
                     <div class="feature-icon"><i class="fas fa-headset"></i></div>
-                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Service Client 24/7</h3>
-                    <p class="text-gray-600 leading-relaxed">Équipe dédiée disponible 24h/24 pour répondre à vos questions et vous conseiller sur les meilleurs produits.</p>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-3">Conseil & Support</h3>
+                    <p class="text-gray-600 leading-relaxed">Notre équipe vous guide dans le choix des consommables adaptés à votre imprimante. Disponibles par téléphone et en boutique à Madina Marché.</p>
                 </div>
             </div>
         </div>
@@ -621,10 +931,10 @@
                         FBK <span class="gradient-text">Printing</span> Industrie
                     </h2>
                     <p class="text-gray-600 text-lg leading-relaxed mb-6">
-                        Nous sommes <strong>FBK Printing Industrie</strong>, spécialistes des produits de beauté et d'impression premium en Guinée. Nous fournissons les meilleures affiches et soins, fabriqués avec passion depuis notre atelier de <strong>Gare Voiture Linsan, Madina Marché</strong>.
+                        Nous sommes <strong>FBK Printing Industrie</strong>, votre fournisseur spécialisé en <strong>matériaux d'imprimantes</strong> en Guinée. Papiers, rouleaux thermiques, encres, cartouches, presses et accessoires — nous équipons les professionnels et particuliers depuis notre boutique de <strong>Gare Voiture Linsan, Madina Marché</strong>.
                     </p>
                     <p class="text-gray-600 leading-relaxed mb-8">
-                        Notre mission : sublimer la beauté naturelle de chaque client avec des produits certifiés, accessibles et fabriqués localement avec des ingrédients de qualité premium.
+                        Notre mission : vous fournir des consommables d'impression de qualité professionnelle, compatibles avec toutes les grandes marques d'imprimantes, à des prix accessibles et avec un service de proximité.
                     </p>
                     <div class="flex flex-wrap gap-4">
                         <div class="flex items-center gap-3 bg-white rounded-xl px-5 py-3 shadow-sm border border-gray-100">
@@ -642,7 +952,7 @@
                             </div>
                             <div>
                                 <p class="text-xs text-gray-400 font-medium">Qualité</p>
-                                <p class="text-sm font-semibold text-gray-700">Produits certifiés</p>
+                                <p class="text-sm font-semibold text-gray-700">Matériaux pro certifiés</p>
                             </div>
                         </div>
                     </div>
@@ -651,10 +961,10 @@
                     <div class="relative w-full max-w-sm">
                         <div class="bg-gradient-to-br from-amber-500 to-amber-600 rounded-3xl p-8 text-white text-center shadow-2xl">
                             <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <i class="fas fa-industry text-white text-4xl"></i>
+                                <i class="fas fa-print text-white text-4xl"></i>
                             </div>
                             <h3 class="text-2xl font-bold mb-2">FBK Printing</h3>
-                            <p class="text-white/80 text-sm mb-6">Gare Voiture Linsan, Madina Marché — Conakry, Guinée</p>
+                            <p class="text-white/80 text-sm mb-6">Spécialiste matériaux d'impression<br>Gare Voiture Linsan, Madina Marché — Conakry</p>
                             <div class="space-y-3 text-left">
                                 <div class="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-2">
                                     <i class="fas fa-phone text-white/80 text-sm"></i>
@@ -687,7 +997,7 @@
                     Nous sommes à <span class="gradient-text">votre écoute</span>
                 </h2>
                 <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-                    Une question, une commande ou un partenariat ? Contactez FBK Printing directement.
+                    Besoin de papier, d'encre, de rouleaux ou d'un devis ? Contactez FBK Printing directement.
                 </p>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
@@ -728,9 +1038,9 @@
     <section class="py-16 bg-gradient-to-r from-amber-500 to-amber-600">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-3xl mx-auto text-center text-white">
-                <h2 class="text-4xl font-bold mb-4">Recevez nos offres exclusives</h2>
-                <p class="text-lg text-white/90 mb-8">Inscrivez-vous à notre newsletter et bénéficiez de 10% de réduction sur votre première commande</p>
-                <form action="" method="POST" class="flex gap-2 max-w-md mx-auto">
+                <h2 class="text-4xl font-bold mb-4">Offres et nouveautés impression</h2>
+                <p class="text-lg text-white/90 mb-8">Inscrivez-vous à notre newsletter et soyez le premier informé de nos promotions sur les papiers, encres et rouleaux</p>
+                <form action="{{ route('newsletter.subscribe') }}" method="POST" class="flex gap-2 max-w-md mx-auto">
                     @csrf
                     <input type="email" name="email" placeholder="Votre email" required
                         class="flex-1 px-6 py-3 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-white">
@@ -753,10 +1063,10 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                 <div>
                     <div class="flex items-center space-x-2 mb-4">
-                        <div class="w-8 h-8 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-white font-bold">F</div>
+                        <img src="{{ asset('assets/img/fbk.png') }}" alt="FBK-Printing" class="h-8 w-auto object-contain">
                         <span class="font-bold text-white">FBK-Printing</span>
                     </div>
-                    <p class="text-sm text-gray-400">Produits de beauté premium fabriqués en Guinée avec passion et expertise.</p>
+                    <p class="text-sm text-gray-400">Spécialiste en matériaux d'imprimantes — papier, encre, rouleaux, presses — basé à Conakry, Guinée.</p>
                 </div>
                 <div>
                     <h4 class="font-bold text-white mb-4">Liens utiles</h4>
@@ -788,7 +1098,7 @@
             </div>
             <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
                 <p>&copy; {{ date('Y') }} FBK-Printing. Tous droits réservés. Conakry, Guinée.</p>
-                <p class="mt-2">Fabriqué avec <i class="fas fa-heart text-red-500"></i> pour la beauté naturelle</p>
+                <p class="mt-2">Conçu avec <i class="fas fa-heart text-red-500"></i> pour l'impression professionnelle</p>
             </div>
         </div>
     </footer>
@@ -815,7 +1125,7 @@
             
             const imgHTML = p.image
                 ? `<img src="${p.image}" alt="Image non trouvée: ${p.image}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='https://placehold.co/400x400?text=Introuvable'">`
-                : `<span class="no-img">🌿</span>`;
+                : `<span class="no-img">🖨️</span>`;
             return `<div class="prod-card">
                 <div class="prod-img">
                     <span class="prod-badge ${badgeCls}">${badgeTxt}</span>
@@ -911,9 +1221,46 @@
         }
 
         /* ── Panier (avec débogage) ── */
+        /* ── Toast notification ── */
+        function showToast(msg, type = 'success') {
+            const existing = document.getElementById('cart-toast');
+            if (existing) existing.remove();
+
+            const icons = { success: '🛍️', error: '❌' };
+            const colors = {
+                success: 'linear-gradient(135deg,#f5a962,#d97706)',
+                error:   'linear-gradient(135deg,#ef4444,#dc2626)'
+            };
+
+            const toast = document.createElement('div');
+            toast.id = 'cart-toast';
+            toast.innerHTML = `<span style="font-size:20px">${icons[type]}</span><span>${msg}</span>`;
+            toast.style.cssText = `
+                position:fixed; bottom:28px; right:28px; z-index:9999;
+                display:flex; align-items:center; gap:12px;
+                padding:14px 22px; border-radius:14px;
+                background:${colors[type]}; color:#fff;
+                font-size:14px; font-weight:600;
+                box-shadow:0 8px 30px rgba(0,0,0,0.18);
+                transform:translateY(80px); opacity:0;
+                transition:transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.3s;
+                font-family:'Poppins',sans-serif;
+            `;
+            document.body.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.style.transform = 'translateY(0)';
+                toast.style.opacity   = '1';
+            });
+
+            setTimeout(() => {
+                toast.style.transform = 'translateY(80px)';
+                toast.style.opacity   = '0';
+                setTimeout(() => toast.remove(), 350);
+            }, 2800);
+        }
+
         function addToCart(id) {
-            console.log("Tentative d'ajout du produit ID:", id);
-            
             fetch(`{{ url('/cart/add') }}/${id}`, {
                 method: 'POST',
                 headers: {
@@ -923,24 +1270,19 @@
                 }
             })
             .then(response => {
-                console.log("Réponse reçue, statut:", response.status);
-                if (!response.ok) throw new Error('Erreur réseau ou produit introuvable');
+                if (!response.ok) throw new Error();
                 return response.json();
             })
             .then(data => {
-                console.log("Données reçues:", data);
                 const badge = document.getElementById('cart-count');
                 if (badge && data.count !== undefined) {
                     badge.textContent = data.count;
-                    badge.classList.add('animate__animated', 'animate__rubberBand');
-                    setTimeout(() => badge.classList.remove('animate__animated', 'animate__rubberBand'), 1000);
+                    badge.style.transform = 'scale(1.5)';
+                    setTimeout(() => badge.style.transform = 'scale(1)', 300);
                 }
-                alert("Produit ajouté au panier !");
+                showToast('Produit ajouté au panier !');
             })
-            .catch(error => {
-                console.error("Erreur lors de l'ajout:", error);
-                alert("Erreur : Impossible d'ajouter le produit au panier.");
-            });
+            .catch(() => showToast('Impossible d\'ajouter ce produit.', 'error'));
         }
 
         /* ── Init ── */
@@ -958,8 +1300,44 @@
 
         /* ── Menu mobile ── */
         document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-            alert('Menu mobile — à implémenter avec votre système de navigation');
+            // menu mobile à implémenter
         });
+
+        /* ── Hero Carousel ── */
+        (function() {
+            const slides = document.querySelectorAll('.hero-slide');
+            const dots   = document.querySelectorAll('.hero-dot');
+            if (!slides.length) return;
+
+            let current = 0;
+            let timer   = null;
+
+            function goTo(n) {
+                slides[current].classList.remove('active');
+                slides[current].classList.add('exit');
+                dots[current]?.classList.remove('active');
+
+                const old = current;
+                current = (n + slides.length) % slides.length;
+
+                slides[current].classList.remove('exit');
+                slides[current].classList.add('active');
+                dots[current]?.classList.add('active');
+
+                setTimeout(() => slides[old].classList.remove('exit'), 750);
+            }
+
+            function startAuto() {
+                clearInterval(timer);
+                timer = setInterval(() => goTo(current + 1), 3500);
+            }
+
+            document.getElementById('heroNext')?.addEventListener('click', () => { goTo(current + 1); startAuto(); });
+            document.getElementById('heroPrev')?.addEventListener('click', () => { goTo(current - 1); startAuto(); });
+            dots.forEach(d => d.addEventListener('click', () => { goTo(+d.dataset.dot); startAuto(); }));
+
+            startAuto();
+        })();
     </script>
 </body>
 </html>

@@ -23,7 +23,6 @@ class User extends Authenticatable
         'phone',
         'status',
         'token',
-        'motdepasse',
         'description',
     ];
 
@@ -59,9 +58,11 @@ class User extends Authenticatable
     }
 
     public function getRoleAttribute(){
+        return $this->roleRelation?->slug ?? '';
+    }
 
-        $c = Role::find($this->role_id);
-        return $c->slug;
+    public function roleRelation(){
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
     public function factures(){

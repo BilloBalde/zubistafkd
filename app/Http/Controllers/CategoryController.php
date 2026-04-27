@@ -14,8 +14,9 @@ class CategoryController extends Controller
     
     public function index()
     {
-        $categories = Category::all();
-        return view('categories.index', compact('categories'));
+        $grouped = Category::orderBy('category_type')->orderBy('slug')->get()
+            ->groupBy('category_type');
+        return view('categories.index', compact('grouped'));
     }
 
     public function create()
@@ -29,6 +30,7 @@ class CategoryController extends Controller
             'slug' => 'required|unique:categories,slug',
             'category_type' => 'required|string',
             'description' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ],[
             'slug.required' => 'L\'identifiant est réquis',
             'slug.unique' => 'L\'identifiant doit être unique, il existe déjà',
@@ -39,7 +41,13 @@ class CategoryController extends Controller
         ]);
 
         try {
-            Category::create($request->all());
+            $data = $request->only(['slug', 'category_type', 'description']);
+            if ($request->hasFile('image')) {
+                $imageName = time() . '.' . $request->image->getClientOriginalExtension();
+                $request->image->move(public_path('categories'), $imageName);
+                $data['image'] = $imageName;
+            }
+            Category::create($data);
             return redirect()->route('categories.index')->with('success', 'Category crée avec succès.');
         } catch (\Throwable $th) {
             return redirect()->route('categories.index')->with('error', 'Error lors de la creation de la categorie.'.$th->getMessage());
@@ -63,11 +71,17 @@ class CategoryController extends Controller
             'slug' => 'required',
             'category_type' => 'required',
             'description' => 'required',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
         $categoryEmballage = Category::findOrFail($categoryEmballage);
-        //dd($categoryEmballage);
         try {
-            $categoryEmballage->update($request->all());
+            $data = $request->only(['slug', 'category_type', 'description']);
+            if ($request->hasFile('image')) {
+                $imageName = time() . '.' . $request->image->getClientOriginalExtension();
+                $request->image->move(public_path('categories'), $imageName);
+                $data['image'] = $imageName;
+            }
+            $categoryEmballage->update($data);
             return redirect()->route('categories.index')->with('success', 'Category modifié successfully.');
         } catch (\Throwable $th) {
             return redirect()->route('categories.index')->with('error', 'Error lors de la modification de la categorie.'.$th->getMessage());

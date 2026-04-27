@@ -31,8 +31,11 @@ class AuthOtpController extends Controller
             ->with('success', 'Inscription réussie. Veuillez entrer le code OTP.');
     }
 
-    public function showLogin()
+    public function showLogin(Request $request)
     {
+        if ($request->query('redirect')) {
+            session(['auth_redirect' => $request->query('redirect')]);
+        }
         return view('ecommerce.auth.login');
     }
 
@@ -65,7 +68,7 @@ class AuthOtpController extends Controller
     {
         $request->validate([
             'phone' => 'required|string',
-            'code' => 'required|string|size:6'
+            'code'  => 'required|string|size:6',
         ]);
 
         $verified = $this->authService->verifyOtp($request->phone, $request->code);
@@ -73,6 +76,13 @@ class AuthOtpController extends Controller
         if ($verified) {
             $user = $this->authService->login($request->phone);
             Auth::login($user);
+
+            $redirect = session()->pull('auth_redirect');
+
+            if ($redirect === 'checkout') {
+                return redirect()->route('checkout')->with('success', 'Bienvenue !');
+            }
+
             return redirect()->route('shop.home')->with('success', 'Bienvenue !');
         }
 

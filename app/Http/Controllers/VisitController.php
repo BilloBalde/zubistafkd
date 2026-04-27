@@ -28,59 +28,97 @@ class VisitController extends Controller
     }
 
     /**
-     * Alias catalogue (route historique /products).
+     * Page catalogue publique — tous les produits.
      */
     public function indexProducts()
     {
-        return $this->index();
+        return view('catalogue', $this->buildHomePageData());
+    }
+
+    /**
+     * Page publique — toutes les catégories.
+     */
+    public function publicCategories()
+    {
+        $categories = $this->groupedCategories();
+        return view('visitor.categories', compact('categories'));
+    }
+
+    private function groupedCategories(): \Illuminate\Support\Collection
+    {
+        return Category::withCount('products')
+            ->get()
+            ->groupBy('category_type')
+            ->map(function ($group, $type) {
+                $withImage = $group->first(fn($c) => !empty($c->image));
+                return (object)[
+                    'name'           => $type,
+                    'category_type'  => $type,
+                    'products_count' => $group->sum('products_count'),
+                    'image'          => $withImage?->image ?? null,
+                    'image_url'      => $withImage ? asset('categories/' . $withImage->image) : null,
+                ];
+            })
+            ->sortBy('name')
+            ->values();
     }
 
     protected function buildHomePageData(): array
     {
-        $mapProduct = function ($p) {
-            $imageUrl = $p->image ? asset('products/' . $p->image) : null;
+        $getCategoryName = fn($p) => $p->categories->first()?->category_type ?? 'Sans catégorie';
 
+        $mapProduct = function ($p) use ($getCategoryName) {
             return [
-                'id' => $p->id,
-                'name' => $p->libelle ?? $p->name,
-                'category_name' => $p->category?->name ?? 'Sans catégorie',
-                'price' => (float) $p->price,
-                'old_price' => null,
-                'discount' => null,
-                'rating' => (float) ($p->rating ?? 4.5),
-                'image' => $imageUrl,
+                'id'            => $p->id,
+                'name'          => $p->libelle ?? $p->name,
+                'category_name' => $getCategoryName($p),
+                'price'         => (float) $p->price,
+                'old_price'     => null,
+                'discount'      => null,
+                'rating'        => (float) ($p->rating ?? 4.5),
+                'image'         => $p->image ? asset('products/' . $p->image) : null,
             ];
         };
 
-        $mapPromo = function ($p) {
-            $imageUrl = $p->image ? asset('products/' . $p->image) : null;
-
+        $mapPromo = function ($p) use ($getCategoryName) {
             return [
-                'id' => $p->id,
-                'name' => $p->libelle ?? $p->name,
-                'category_name' => $p->category?->name ?? 'Sans catégorie',
-                'price' => (float) ($p->promo_price ?? $p->price),
-                'old_price' => (float) $p->price,
-                'discount' => $p->promo_price ? round((1 - $p->promo_price / $p->price) * 100) : 0,
-                'rating' => (float) ($p->rating ?? 4.5),
-                'image' => $imageUrl,
+                'id'            => $p->id,
+                'name'          => $p->libelle ?? $p->name,
+                'category_name' => $getCategoryName($p),
+                'price'         => (float) ($p->promo_price ?? $p->price),
+                'old_price'     => (float) $p->price,
+                'discount'      => $p->promo_price ? round((1 - $p->promo_price / $p->price) * 100) : 0,
+                'rating'        => (float) ($p->rating ?? 4.5),
+                'image'         => $p->image ? asset('products/' . $p->image) : null,
             ];
         };
+
+        $categories      = $this->groupedCategories();
+        $totalCategories = $categories->count();
+        $totalProducts   = Product::count();
 
         return [
-            'categories' => Category::withCount('products')->get(),
-            'bestProducts' => Product::with('category')
-                ->orderByDesc('rating')
-                ->take(8)
-                ->get()
-                ->map($mapProduct)
-                ->values(),
-            'promoProducts' => Product::with('category')
-                ->whereNotNull('promo_price')
-                ->get()
-                ->map($mapPromo)
-                ->values(),
+            'categories'      => $categories,
+            'totalCategories' => $totalCategories,
+            'totalProducts'   => $totalProducts,
+            'allProducts'  => Product::with('categories')->latest()->get()->map($mapProduct)->values(),
+            'bestProducts' => Product::with('categories')->orderByDesc('rating')->take(10)->get()->map($mapProduct)->values(),
+            'promoProducts'=> Product::with('categories')->whereNotNull('promo_price')->get()->map($mapPromo)->values(),
         ];
+    }
+
+    public function showProduct($id)
+    {
+        $product = \App\Models\Product::with('categories')->findOrFail($id);
+        $related = \App\Models\Product::with('categories')
+            ->whereHas('categories', function ($q) use ($product) {
+                $q->whereIn('categories.id', $product->categories->pluck('id'));
+            })
+            ->where('id', '!=', $id)
+            ->take(4)
+            ->get();
+
+        return view('visitor.productDetail', compact('product', 'related'));
     }
 
     public function loadMoreProducts(Request $request)

@@ -22,7 +22,7 @@ class FactureController extends Controller
 
     public function index(Request $request){
         $customers = Customer::all();
-        $query = Facture::query();
+        $query = Facture::where('numero_facture', 'not like', 'INV-%');
 
         if ($request->filled('numero_facture')) {
             $query->where('numero_facture', 'like', '%' . $request->input('numero_facture') . '%');
@@ -45,9 +45,10 @@ class FactureController extends Controller
         }
 
         if (auth()->user()->role_id == 3) {
-            $dataTable = $query->where('store_id', Store::where('user_id', auth()->user()->id)->first()?->id)->get();
+            $dataTable = $query->where('store_id', Store::where('user_id', auth()->user()->id)->first()?->id)
+                ->with('customer', 'store')->get();
         } else {
-            $dataTable = $query->get();
+            $dataTable = $query->with('customer', 'store')->get();
         }
 
         return view('factures.index', compact('dataTable', 'customers',));
@@ -59,7 +60,7 @@ class FactureController extends Controller
         $laFacture = is_numeric($facture)
             ? Facture::findOrFail($facture)
             : Facture::where('numero_facture', $facture)->firstOrFail();
-        $invoice   = Sale::where('numeroFacture', $laFacture->numero_facture)->get();
+        $invoice   = Sale::where('numeroFacture', $laFacture->numero_facture)->with('product')->get();
         $customer  = Customer::find($laFacture->customer_id);
         $paiements = Payment::where('facture_id', $laFacture->id)->get();
         return view('factures.show', compact('invoice', 'facture', 'laFacture', 'customer', 'user', 'paiements'));
@@ -96,7 +97,7 @@ class FactureController extends Controller
                 'customer_id' => $customer_id ?? $request->customer_id,
                 'avance' => $request->avance,
                 'notes' => $request->notes,
-                'statut' => 'pending',
+                'statut' => 'non payé',
                 'livraison' => 'non livré',
             ]);
             $sms = "Facture cree avec success";

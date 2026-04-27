@@ -55,25 +55,32 @@
                         </label>
                         <label for="pay_om" class="block cursor-pointer">
                             <input class="peer sr-only" type="radio" name="payment_method" id="pay_om" value="orange_money">
-                            <span class="block rounded-xl border-2 border-gray-200 p-4 transition peer-checked:border-amber-500 peer-checked:bg-amber-50/60 hover:border-amber-200">
-                                <span class="block font-semibold text-gray-900">Orange Money</span>
-                                <span class="block text-sm text-gray-600 mt-1">Paiement mobile</span>
+                            <span class="block rounded-xl border-2 border-gray-200 p-4 transition peer-checked:border-orange-500 peer-checked:bg-orange-50/60 hover:border-orange-200">
+                                <span class="flex items-center gap-2 font-semibold text-gray-900">
+                                    <span class="flex items-center justify-center w-7 h-7 rounded-full bg-orange-500 text-white text-xs font-bold">OM</span>
+                                    Orange Money
+                                </span>
+                                <span class="block text-sm text-gray-600 mt-1">Paiement sécurisé via Orange Money</span>
                             </span>
                         </label>
                     </div>
 
-                    <!-- Champ capture d'écran (caché par défaut) -->
-                    <div id="screenshot-field" class="mt-4 pt-4 border-t border-gray-100 hidden">
-                        <label for="payment_screenshot" class="block text-sm font-medium text-gray-700 mb-1">
-                            Capture d'écran du paiement <span class="text-red-500">*</span>
-                        </label>
-                        <input type="file" name="payment_screenshot" id="payment_screenshot"
-                               accept="image/png, image/jpeg, image/jpg, image/webp"
-                               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none transition file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100">
-                        <p class="text-xs text-gray-500 mt-1">Formats acceptés : JPG, PNG, WEBP. Poids max : 2 Mo.</p>
-                        @error('payment_screenshot')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                    {{-- Info Orange Money affichée quand Orange Money est sélectionné --}}
+                    <div id="om-info" class="hidden mt-4 pt-4 border-t border-gray-100">
+                        <div class="flex items-start gap-3 bg-orange-50 border border-orange-200 rounded-xl p-4">
+                            <span class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-full bg-orange-500 text-white font-bold text-sm">OM</span>
+                            <div>
+                                <p class="text-sm font-semibold text-orange-800">Paiement Orange Money sécurisé</p>
+                                <p class="text-xs text-orange-700 mt-1 leading-relaxed">
+                                    Après confirmation, vous serez redirigé vers la page de paiement Orange Money
+                                    pour finaliser votre achat en GNF.
+                                </p>
+                                <div class="flex items-center gap-1 mt-2">
+                                    <i class="fas fa-shield-alt text-green-500 text-xs"></i>
+                                    <span class="text-xs text-gray-500">Paiement chiffré et sécurisé</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -111,10 +118,12 @@
                             <span class="text-amber-600">{{ number_format($total, 0, ',', ' ') }} GNF</span>
                         </div>
                     </div>
-                    <button type="submit"
-                            class="mt-6 w-full inline-flex justify-center items-center py-3 px-4 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold shadow-md hover:opacity-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    <button type="submit" id="submit-btn"
+                            class="mt-6 w-full inline-flex justify-center items-center gap-2 py-3 px-4 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold shadow-md hover:opacity-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
                             {{ $addresses->count() == 0 ? 'disabled' : '' }}>
-                        Confirmer la commande
+                        <i class="fas fa-check-circle" id="btn-icon-cod"></i>
+                        <i class="fas fa-mobile-alt hidden" id="btn-icon-om"></i>
+                        <span id="btn-label">Confirmer la commande</span>
                     </button>
                 </div>
             </div>
@@ -124,27 +133,44 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const radioCod = document.getElementById('pay_cod');
-        const radioOm = document.getElementById('pay_om');
-        const screenshotField = document.getElementById('screenshot-field');
-        const screenshotInput = document.getElementById('payment_screenshot');
+        const radioCod   = document.getElementById('pay_cod');
+        const radioOm    = document.getElementById('pay_om');
+        const omInfo     = document.getElementById('om-info');
+        const btnLabel   = document.getElementById('btn-label');
+        const btnIconCod = document.getElementById('btn-icon-cod');
+        const btnIconOm  = document.getElementById('btn-icon-om');
+        const submitBtn  = document.getElementById('submit-btn');
+        const form       = submitBtn.closest('form');
 
-        function toggleScreenshotField() {
+        function updateUI() {
             if (radioOm.checked) {
-                screenshotField.classList.remove('hidden');
-                screenshotInput.setAttribute('required', 'required');
+                omInfo.classList.remove('hidden');
+                submitBtn.classList.remove('from-amber-500', 'to-amber-600');
+                submitBtn.classList.add('from-orange-500', 'to-orange-600');
+                btnLabel.textContent = 'Payer avec Orange Money';
+                btnIconCod.classList.add('hidden');
+                btnIconOm.classList.remove('hidden');
             } else {
-                screenshotField.classList.add('hidden');
-                screenshotInput.removeAttribute('required');
-                screenshotInput.value = ''; // Efface le fichier sélectionné
+                omInfo.classList.add('hidden');
+                submitBtn.classList.add('from-amber-500', 'to-amber-600');
+                submitBtn.classList.remove('from-orange-500', 'to-orange-600');
+                btnLabel.textContent = 'Confirmer la commande';
+                btnIconCod.classList.remove('hidden');
+                btnIconOm.classList.add('hidden');
             }
         }
 
-        radioCod.addEventListener('change', toggleScreenshotField);
-        radioOm.addEventListener('change', toggleScreenshotField);
+        // Désactiver le bouton pendant la soumission pour éviter les doubles clics
+        form.addEventListener('submit', function () {
+            submitBtn.disabled = true;
+            btnLabel.textContent = radioOm.checked ? 'Redirection vers Orange Money…' : 'Traitement en cours…';
+            submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+        });
 
-        // Exécuter au chargement (si Orange Money est pré-sélectionné, mais par défaut c'est COD)
-        toggleScreenshotField();
+        radioCod.addEventListener('change', updateUI);
+        radioOm.addEventListener('change', updateUI);
+
+        updateUI();
     });
 </script>
 @endsection

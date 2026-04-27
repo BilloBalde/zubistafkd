@@ -50,7 +50,7 @@ class SaleController extends Controller
             $query->where('created_at', $request->input('created_at'));
         }
 
-        $dataTable = $query->get();
+        $dataTable = $query->with('product', 'store')->get();
 
         // Pass the necessary data to the view, including options for filters
         $customers = Customer::all();
@@ -104,7 +104,7 @@ class SaleController extends Controller
 
     public function voirSales($numero_facture){
         //dd('Here i am');
-        $ligneVentes = Sale::where('numeroFacture', $numero_facture)->get();
+        $ligneVentes = Sale::where('numeroFacture', $numero_facture)->with('product')->get();
         return view('sales.voirSales', compact('ligneVentes', 'numero_facture'));
     }
 
@@ -144,34 +144,44 @@ public function store(Request $request)
     DB::beginTransaction();
     try {
         $store = Store::findOrFail($request->store_id);
+        $totalInteret = 0;
 
         foreach ($salesData as $data) {
-            $data["prixTotal"] = $data['prix'] * $data['quantity'];
+            $qty              = (int) $data['quantity'];
+            $data["prixTotal"] = $data['prix'] * $qty;
+
+            // Stock par boutique
             DB::table('store_products')
                 ->where('store_id', $request->store_id)
                 ->where('product_id', $data['product_id'])
-                ->decrement('quantity', $data['quantity']);
+                ->decrement('quantity', $qty);
 
-            $lastPurchase = Purchase::where('product_id', $data['product_id'])->first();
-            $prix_achat   = $lastPurchase ? $lastPurchase->price : 0;
-            $data["interet"] = ($data['prix'] - $prix_achat) * $data['quantity'];
-            $total_quantity += $data['quantity'];
+            // Stock global synchronisé
+            Product::where('id', $data['product_id'])
+                ->update(['pcs' => DB::raw("GREATEST(pcs - {$qty}, 0)")]);
+
+            // Intérêt basé sur le dernier prix d'achat (le plus récent = le plus représentatif)
+            $lastPurchase    = Purchase::where('product_id', $data['product_id'])->latest()->first();
+            $prix_achat      = $lastPurchase ? $lastPurchase->price : 0;
+            $data["interet"] = ($data['prix'] - $prix_achat) * $qty;
+            $totalInteret   += $data['interet'];
+            $total_quantity += $qty;
             $total_price    += $data['prixTotal'];
 
             Sale::create([
                 'numeroFacture' => $request->numeroFacture,
                 'product_id'    => $data['product_id'],
                 'prix'          => $data['prix'],
-                'quantity'      => $data['quantity'],
+                'quantity'      => $qty,
                 'prixTotal'     => $data['prixTotal'],
                 'interet'       => $data['interet'],
                 'store_id'      => $request->store_id,
             ]);
-
-            $store->balance += $data['interet'];
-            $store->save();
             $i++;
         }
+
+        // Une seule mise à jour du solde boutique après la boucle
+        $store->increment('balance', $totalInteret);
 
         $reste = $total_price - $request->avance;
 
@@ -276,30 +286,54 @@ public function store(Request $request)
                 return redirect()->route('sales.index')->with('error', 'Facture non trouvée.');
             }
 
-            $paiements     = Payment::where('facture_id', $invoice->id)->get();
-            $resteQuantity = $sale->quantity - $request->quantity;
-            $resteMontant  = ($sale->quantity * $sale->prix) - ($request->quantity * $request->prix);
+            $paiements      = Payment::where('facture_id', $invoice->id)->get();
+            $oldQty         = $sale->quantity;
+            $newQty         = (int) $request->quantity;
+            $diffQty        = $oldQty - $newQty; // positif = on a vendu moins → remettre en stock
+            $resteMontant   = ($oldQty * $sale->prix) - ($newQty * $request->prix);
 
-            $invoice->quantity      -= $resteQuantity;
+            // Mettre à jour la facture
+            $invoice->quantity      -= ($oldQty - $newQty);
             $invoice->montant_total -= $resteMontant;
-            $invoice->reste         -= $resteMontant;
+            $invoice->reste          = max(0, $invoice->reste - $resteMontant);
             $invoice->save();
 
+            // Mettre à jour le reste de chaque paiement
             foreach ($paiements as $pay) {
-                $pay->reste -= $resteMontant;
+                $pay->reste = max(0, $pay->reste - $resteMontant);
                 $pay->save();
             }
 
-            StoreProduct::updateOrCreate(
-                ['store_id' => $sale->store_id, 'product_id' => $sale->product_id],
-                ['quantity' => DB::raw("quantity + {$resteQuantity}")]
-            );
+            // Remettre la différence de quantité en stock (boutique + global)
+            if ($diffQty !== 0) {
+                StoreProduct::updateOrCreate(
+                    ['store_id' => $sale->store_id, 'product_id' => $sale->product_id],
+                    ['quantity' => DB::raw('quantity + ' . $diffQty)]
+                );
+                // Pour le stock global : on remet si diffQty > 0, on enlève si diffQty < 0
+                if ($diffQty > 0) {
+                    Product::where('id', $sale->product_id)->increment('pcs', $diffQty);
+                } else {
+                    Product::where('id', $sale->product_id)
+                        ->update(['pcs' => DB::raw('GREATEST(pcs - ' . abs($diffQty) . ', 0)')]);
+                }
+            }
 
-            $prixAchat     = Purchase::where('product_id', $sale->product_id)->first()?->price ?? 0;
-            $sale->prix    = $request->prix;
-            $sale->quantity  = $request->quantity;
-            $sale->prixTotal = $request->quantity * $request->prix;
-            $sale->interet   = ($request->prix - $prixAchat) * $request->quantity;
+            // Recalculer l'intérêt et mettre à jour le solde boutique
+            $prixAchat   = Purchase::where('product_id', $sale->product_id)->latest()->first()?->price ?? 0;
+            $ancienInteret = $sale->interet;
+            $nouvelInteret = ($request->prix - $prixAchat) * $newQty;
+            $diffInteret   = $nouvelInteret - $ancienInteret;
+
+            if ($diffInteret != 0) {
+                $store = Store::find($sale->store_id);
+                $store?->increment('balance', $diffInteret);
+            }
+
+            $sale->prix      = $request->prix;
+            $sale->quantity  = $newQty;
+            $sale->prixTotal = $newQty * $request->prix;
+            $sale->interet   = $nouvelInteret;
             $sale->save();
 
             DB::commit();
@@ -318,7 +352,53 @@ public function store(Request $request)
      */
     public function destroy(Sale $sale)
     {
-        //
+        DB::beginTransaction();
+        try {
+            // Remettre le stock en boutique
+            StoreProduct::where('store_id', $sale->store_id)
+                ->where('product_id', $sale->product_id)
+                ->increment('quantity', $sale->quantity);
+
+            // Remettre le stock global
+            Product::where('id', $sale->product_id)->increment('pcs', $sale->quantity);
+
+            // Reverser l'intérêt du solde boutique
+            $store = Store::find($sale->store_id);
+            if ($store && $sale->interet > 0) {
+                $store->decrement('balance', $sale->interet);
+            }
+
+            // Mettre à jour la facture liée
+            $invoice = Facture::where('numero_facture', $sale->numeroFacture)->first();
+            if ($invoice) {
+                $invoice->quantity      = max(0, $invoice->quantity - $sale->quantity);
+                $invoice->montant_total = max(0, $invoice->montant_total - $sale->prixTotal);
+                $invoice->reste         = max(0, $invoice->reste - $sale->prixTotal);
+
+                // Recalculer le statut
+                if ($invoice->montant_total <= 0) {
+                    $invoice->delete();
+                    Payment::where('facture_id', $invoice->id)->delete();
+                } else {
+                    if ($invoice->reste <= 0) {
+                        $invoice->statut = 'payé';
+                    } elseif ($invoice->avance > 0) {
+                        $invoice->statut = 'partiel';
+                    } else {
+                        $invoice->statut = 'non payé';
+                    }
+                    $invoice->save();
+                }
+            }
+
+            $sale->delete();
+            DB::commit();
+
+            return redirect()->route('sales.index')->with('success', 'Ligne de vente supprimée, stock restauré.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->route('sales.index')->with('error', 'Erreur lors de la suppression : ' . $th->getMessage());
+        }
     }
 
     public function exitSale($numero_facture)

@@ -7,7 +7,8 @@
       "Bash(grep -rl '$fillable\\\\|$guarded' c:/Users/hp/Zubista/public_html/app/Models '--include=*.php')",
       "Bash(xargs -I '{}' sh -c 'if grep -q \"\\\\$fillable\" {} && grep -q \"\\\\$guarded\" {}; then echo {}; fi')",
       "Bash(grep -ri \"FCFA\\\\|FG\\\\|€\\\\|\\\\$\" c:/Users/hp/Zubista/public_html/resources/views --include=\"*.blade.php\")",
-      "Bash(grep -oE \"FCFA|FG|€|\\\\$\")"
+      "Bash(grep -oE \"FCFA|FG|€|\\\\$\")",
+      "Bash(php -r \"echo 'PHP OK';\")"
     ]
   }
 }

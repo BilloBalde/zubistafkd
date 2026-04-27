@@ -216,7 +216,7 @@
                         newEntry.remove();
                         updateTotalQuantity();
                     } else {
-                        alert("Vous ne pouvez pas supprimer la dernière ligne.");
+                        showToast("Vous ne pouvez pas supprimer la dernière ligne.", 'warning');
                     }
                 });
 

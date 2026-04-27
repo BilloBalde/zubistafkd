@@ -545,7 +545,7 @@
                     const invalidInputs = document.querySelectorAll('.is-invalid');
                     if (invalidInputs.length > 0) {
                         e.preventDefault();
-                        alert("Veuillez corriger les prix invalides avant de soumettre.");
+                        showToast("Veuillez corriger les prix invalides avant de soumettre.", 'error');
                     }
                 });
             });
@@ -722,7 +722,7 @@
             const invalids = document.querySelectorAll('.is-invalid');
             if (invalids.length > 0) {
                 e.preventDefault();
-                alert("Corrigez les prix invalides avant de soumettre !");
+                showToast("Corrigez les prix invalides avant de soumettre !", 'error');
             }
         });
     });

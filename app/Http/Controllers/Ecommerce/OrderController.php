@@ -6,21 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Ecommerce\OrderRequest;
 use App\Services\OrderService;
 use App\Services\PaymentService;
+use App\Services\Payment\OrangeMoneyService;
 use App\Notifications\OrderPlacedNotification;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
-    protected $orderService;
-    protected $paymentService;
-
-    public function __construct(OrderService $orderService, PaymentService $paymentService)
-    {
-        $this->orderService = $orderService;
-        $this->paymentService = $paymentService;
-    }
+    public function __construct(
+        private OrderService $orderService,
+        private PaymentService $paymentService,
+        private OrangeMoneyService $orangeMoney,
+    ) {}
 
     public function checkout()
     {
@@ -56,23 +55,40 @@ class OrderController extends Controller
             $request->payment_method
         );
 
-        $screenshotPath = null;
-        if ($request->payment_method === 'orange_money' && $request->hasFile('payment_screenshot')) {
-            $file = $request->file('payment_screenshot');
-            $filename = 'screenshot_' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
-            $screenshotPath = $file->storeAs('screenshots', $filename, 'public');
-
- 
-        }
-
-        // Notification
+        // Notification de commande passée
         Auth::user()->notify(new OrderPlacedNotification($order));
 
         // Vider le panier
         session()->forget('cart');
 
+        // Orange Money → initier le paiement et rediriger vers la page Orange
+        if ($request->payment_method === 'orange_money') {
+            $result = $this->orangeMoney->initiatePayment(
+                amount:  (int) $order->total_amount,
+                orderId: 'FBK-' . $order->id,
+                user:    Auth::user(),
+            );
+
+            if (!$result['success']) {
+                Log::error('[Checkout] Échec initiation Orange Money', [
+                    'order_id' => $order->id,
+                    'error'    => $result['error'],
+                ]);
+
+                return redirect()->route('orders.show', $order->id)
+                    ->with('error', 'Commande créée mais le paiement Orange Money a échoué : ' . $result['error'] . ' — Réessayez depuis vos commandes.');
+            }
+
+            // Sauvegarder le pay_token pour retrouver la commande dans le webhook
+            $order->update(['transaction_id' => $result['pay_token']]);
+
+            // Redirection vers la page de paiement Orange Money
+            return redirect()->away($result['payment_url']);
+        }
+
+        // Paiement à la livraison → confirmation classique
         return redirect()->route('orders.show', $order->id)
-            ->with('success', 'Votre commande a été prise en charge avec succès.');
+            ->with('success', 'Votre commande a été confirmée. Notre équipe vous contactera bientôt.');
     }
 
     public function index()

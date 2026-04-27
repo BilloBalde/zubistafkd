@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
-use tidy;
-
 class Authentification extends Controller
 {
     public function login()
@@ -61,7 +59,6 @@ class Authentification extends Controller
                 'token' => $token,
                 'description' => $request->description ?? null,
                 'password' => Hash::make($request->password),
-                'motdepasse' => $request->password ?? 0,
             ]);
         
 
@@ -166,16 +163,21 @@ class Authentification extends Controller
     }
 
     public function passwordRecovery(Request $request){
-        //dd($request->email);
-        $existUser = User::where('email',$request->email)->first();
-        if ($existUser == NULL) {
-            return back()->with('fall', 'User exists not');
+        $existUser = User::where('email', $request->email)->first();
+        if (!$existUser) {
+            return back()->with('fall', 'Aucun compte associé à cet email.');
         }
-        $subject = 'Recuperation de Mot de Passe';//Auth::user()->getAuthPassword()
-        $message = 'Here is your password : '.$existUser->password;
+
+        $token = hash('sha256', time() . $existUser->email);
+        $existUser->token = $token;
+        $existUser->save();
+
+        $resetLink = url('password/reset/' . $token . '/' . $existUser->email);
+        $subject = 'Réinitialisation de votre mot de passe';
+        $message = 'Cliquez sur ce lien pour réinitialiser votre mot de passe (valable 1h) :<br><a href="' . $resetLink . '">' . $resetLink . '</a>';
 
         Mail::to($request->email)->send(new PasswordMail($subject, $message));
-        return redirect()->route('login')->with('success', 'Verifier votre email pour voir votre mot de passe.');
+        return redirect()->route('login')->with('success', 'Un lien de réinitialisation a été envoyé à votre email.');
     }
 
     public function login_submit(Request $request){

@@ -72,7 +72,7 @@
                                                                 <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;">{{ $facture }} </font></font><br>
                                                                 <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:{{ ($laFacture->statut == "payé") ? '#2E7D32' : '#de2016' }};font-weight: 400;"> {{ $laFacture->statut }}</font></font><br>
                                                                 <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:{{ ($laFacture->livraison == "livré") ? '#2E7D32' : '#de2016' }};font-weight: 400;"> {{ ($laFacture->livraison == "livré") ? 'livré' : 'non livré' }}</font></font><br>
-                                                                <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"> {{ getNow() }}</font></font><br>
+                                                                <font style="vertical-align: inherit;"><font style="vertical-align: inherit;font-size: 14px;color:#000;font-weight: 400;"> {{ now()->format('d/m/Y') }}</font></font><br>
                                                             </td>
                                                         </tr>
                                                     </tbody>
@@ -173,7 +173,7 @@
                                     </div>
                                 </div>
                                 <br/>
-                                <p style="text-align:center; font-weight:bold;">{{ $laFacture->store->description }}</p>
+                                <p style="text-align:center; font-weight:bold;">{{ $laFacture->store?->description ?? '' }}</p>
                             </div>
                         </div>
                     </div>

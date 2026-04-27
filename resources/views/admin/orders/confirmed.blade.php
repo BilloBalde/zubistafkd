@@ -155,31 +155,27 @@
                                                         {{-- Voir facture --}}
                                                         <a href="{{ route('factures.show', $order->facture->id) }}"
                                                            class="btn btn-info btn-sm" title="Voir facture">
-                                                            <i class="fas fa-file-invoice"></i>
+                                                            <i class="fas fa-file-invoice"></i> Facture
                                                         </a>
 
                                                         {{-- Enregistrer paiement --}}
                                                         @if($order->facture->statut !== 'payé')
                                                         <a href="{{ route('payments.creation', $order->facture->id) }}"
                                                            class="btn btn-success btn-sm" title="Enregistrer paiement">
-                                                            <i class="fas fa-money-bill-wave"></i>
+                                                            <i class="fas fa-money-bill-wave"></i> Paiement
                                                         </a>
                                                         @endif
 
                                                         {{-- Marquer comme livré --}}
                                                         @if($order->facture->livraison !== 'livré')
-                                                        <form action="{{ route('factures.update', $order->facture->id) }}"
-                                                              method="POST" style="display:inline"
-                                                              onsubmit="return confirm('Confirmer la livraison de cette commande ?')">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <button type="submit" class="btn btn-warning btn-sm" title="Marquer comme livré">
-                                                                <i class="fas fa-truck"></i>
-                                                            </button>
-                                                        </form>
+                                                        <button type="button" class="btn btn-warning btn-sm" 
+                                                                onclick="openDeliveryModal('{{ $order->facture->id }}', '{{ $order->facture->numero_facture }}')"
+                                                                title="Marquer comme livré">
+                                                            <i class="fas fa-truck"></i> Livrer
+                                                        </button>
                                                         @else
                                                         <span class="btn btn-sm btn-outline-success disabled" title="Déjà livrée">
-                                                            <i class="fas fa-check"></i>
+                                                            <i class="fas fa-check"></i> Livré
                                                         </span>
                                                         @endif
                                                     @endif
@@ -205,5 +201,107 @@
         </div>
         @include('layouts.scripts')
         @include('layouts.delete')
+
+        <script>
+            function openDeliveryModal(factureId, invoiceNumber) {
+                // Récupérer les articles de la commande (données depuis le serveur)
+                fetch(`/admin/orders/facture/${factureId}/items`)
+                    .then(response => response.json())
+                    .then(items => {
+                        let itemsHTML = `
+                            <div class="delivery-form">
+                                <p style="margin-bottom: 16px; color: #6b7280;">Indiquez la quantité livrée pour chaque article :</p>
+                                <form id="partial-delivery-form">
+                        `;
+                        
+                        items.forEach((item, index) => {
+                            itemsHTML += `
+                                <div class="delivery-item" style="margin-bottom: 14px; padding: 12px; background: #f9fafb; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                        <strong>${item.product_name}</strong>
+                                        <span style="color: #9ca3af;">Cmde: ${item.quantity}</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label style="flex: 1; font-size: 13px; color: #6b7280;">Livré :</label>
+                                        <input type="number" 
+                                               name="quantities[${item.id}]" 
+                                               value="${item.quantity_delivered || 0}"
+                                               min="0" 
+                                               max="${item.quantity}"
+                                               class="form-control" 
+                                               style="width: 80px; padding: 6px; border: 1px solid #e5e7eb; border-radius: 6px;"
+                                               required>
+                                        <span style="color: #9ca3af;">/ ${item.quantity}</span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        itemsHTML += `
+                                </form>
+                            </div>
+                        `;
+
+                        Swal.fire({
+                            title: 'Livraison (partielle ou complète)',
+                            html: itemsHTML,
+                            icon: 'info',
+                            iconColor: '#3b82f6',
+                            showCancelButton: true,
+                            confirmButtonColor: '#f59e0b',
+                            cancelButtonColor: '#6b7280',
+                            confirmButtonText: '<i class="fas fa-check"></i> Confirmer la livraison',
+                            cancelButtonText: 'Annuler',
+                            buttonsStyling: false,
+                            customClass: {
+                                confirmButton: 'btn btn-warning ms-2',
+                                cancelButton: 'btn btn-secondary'
+                            },
+                            width: '500px',
+                            didOpen: (modal) => {
+                                modal.querySelector('.swal2-confirm').innerHTML = '<i class="fas fa-check me-2"></i>Confirmer la livraison';
+                                modal.querySelector('.swal2-cancel').innerHTML = 'Annuler';
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Envoyer les données de livraison
+                                const formData = new FormData(document.getElementById('partial-delivery-form'));
+                                
+                                fetch(`/admin/orders/facture/${factureId}/deliver`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                        'Accept': 'application/json',
+                                    },
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        Swal.fire({
+                                            title: 'Succès',
+                                            text: 'Livraison enregistrée avec succès',
+                                            icon: 'success',
+                                            confirmButtonColor: '#10b981',
+                                        }).then(() => {
+                                            location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire('Erreur', data.message, 'error');
+                                    }
+                                })
+                                .catch(error => {
+                                    Swal.fire('Erreur', 'Une erreur est survenue', 'error');
+                                    console.error(error);
+                                });
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        Swal.fire('Erreur', 'Impossible de charger les articles', 'error');
+                        console.error(error);
+                    });
+            }
+        </script>
     </body>
 </html>

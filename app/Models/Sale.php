@@ -23,13 +23,11 @@ class Sale extends Model
     ];
 
     public function getProduitAttribute(){
-        $c = Product::find($this->product_id);
-        return $c->libelle ?? 'Produit inconnu';
+        return $this->product?->libelle ?? 'Produit inconnu';
     }
 
     public function getProduitImageAttribute(){
-        $p = Product::find($this->product_id);
-        return $p->image ?? 'default.png';
+        return $this->product?->image ?? 'default.png';
     }
 
     public function product()
