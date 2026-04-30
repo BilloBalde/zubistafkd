@@ -120,6 +120,7 @@ Route::prefix('shop')->group(function () {
         Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
         Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('addresses.destroy');
         Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+        Route::get('/buy-now/{id}', [OrderController::class, 'buyNow'])->name('buy.now');
         Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');

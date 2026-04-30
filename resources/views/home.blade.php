@@ -365,8 +365,9 @@
             font-size: 12px; color: #9ca3af;
             text-decoration: line-through;
         }
+        .prod-btns { display: flex; gap: 6px; }
         .prod-btn {
-            display: block; width: 100%; padding: 9px; font-size: 12px;
+            flex: 1; padding: 9px 4px; font-size: 11px;
             font-weight: 600; text-align: center;
             background: linear-gradient(135deg, #f5a962, #d97706);
             color: #fff; border: none; border-radius: 10px; cursor: pointer;
@@ -374,6 +375,14 @@
             font-family: 'Poppins', sans-serif;
         }
         .prod-btn:hover { opacity: 0.88; transform: scale(1.02); }
+        .prod-btn-order {
+            flex: 1; padding: 9px 4px; font-size: 11px;
+            font-weight: 600; text-align: center;
+            background: none; color: #d97706;
+            border: 2px solid #d97706; border-radius: 10px; cursor: pointer;
+            transition: all 0.2s; font-family: 'Poppins', sans-serif;
+        }
+        .prod-btn-order:hover { background: #d97706; color: #fff; transform: scale(1.02); }
 
         .empty-state {
             text-align: center; padding: 3rem 1rem;
@@ -719,9 +728,14 @@
                                         <span class="prod-price-old">{{ number_format($p['old_price'], 0, ',', ' ') }} GNF</span>
                                     @endif
                                 </div>
-                                <button class="prod-btn" onclick="event.stopPropagation();addToCart({{ $p['id'] }})">
-                                    <i class="fas fa-shopping-bag mr-1"></i> Ajouter au panier
-                                </button>
+                                <div class="prod-btns">
+                                    <button class="prod-btn" onclick="event.stopPropagation();addToCart({{ $p['id'] }})">
+                                        <i class="fas fa-shopping-bag mr-1"></i> Panier
+                                    </button>
+                                    <button class="prod-btn-order" onclick="event.stopPropagation();orderNow({{ $p['id'] }})">
+                                        <i class="fas fa-bolt mr-1"></i> Commander
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         @endforeach
@@ -915,6 +929,7 @@
             </div>
         </div>
     </section>
+    
 
 
     {{-- ══════════════════════════════════════════
@@ -983,6 +998,89 @@
             </div>
         </div>
     </section>
+
+    {{-- ══════════════════════════════════════════
+         NOS BOUTIQUES
+    ══════════════════════════════════════════ --}}
+    @if(isset($stores) && $stores->count() > 0)
+    <section class="py-20 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="text-center mb-12">
+                <span class="inline-block px-4 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-semibold mb-4">
+                    Où nous trouver
+                </span>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                    Nos <span class="gradient-text">Boutiques</span>
+                </h2>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                    Retrouvez nos points de vente partout en Guinée — chaque boutique est gérée par une équipe dédiée.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-{{ min($stores->count(), 4) }} gap-8">
+                @foreach($stores as $store)
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg hover:border-amber-300 transition duration-300 flex flex-col">
+
+                    {{-- Image boutique --}}
+                    @if($store->image_url)
+                        <img src="{{ $store->image_url }}" alt="{{ $store->name }}"
+                             class="w-full h-44 object-cover"
+                             onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'">
+                        <div class="w-full h-44 bg-gradient-to-br from-amber-100 to-amber-200 items-center justify-center hidden">
+                            <i class="fas fa-store text-amber-500 text-5xl"></i>
+                        </div>
+                    @else
+                        <div class="w-full h-44 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
+                            <i class="fas fa-store text-amber-500 text-5xl"></i>
+                        </div>
+                    @endif
+
+                    {{-- Infos --}}
+                    <div class="p-6 flex flex-col flex-1">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">{{ $store->name }}</h3>
+
+                        @if($store->address)
+                        <div class="flex items-start gap-2 text-sm text-gray-500 mb-2">
+                            <i class="fas fa-map-marker-alt text-amber-500 mt-0.5 flex-shrink-0"></i>
+                            <span>{{ $store->address }}</span>
+                        </div>
+                        @endif
+
+                        @if($store->description)
+                        <p class="text-sm text-gray-600 leading-relaxed mb-4 flex-1">{{ $store->description }}</p>
+                        @endif
+
+                        {{-- Manager --}}
+                        @if($store->manager || $store->phone)
+                        <div class="border-t border-gray-100 pt-4 mt-auto">
+                            <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-2">Responsable</p>
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-user text-amber-600 text-sm"></i>
+                                </div>
+                                <div>
+                                    @if($store->manager)
+                                    <p class="text-sm font-semibold text-gray-800">{{ $store->manager }}</p>
+                                    @endif
+                                    @if($store->phone)
+                                    <a href="tel:{{ $store->phone }}"
+                                       class="text-xs text-amber-600 hover:text-amber-700 font-medium transition">
+                                        <i class="fas fa-phone text-xs mr-1"></i>{{ $store->phone }}
+                                    </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+
+        </div>
+    </section>
+    @endif
 
     {{-- ══════════════════════════════════════════
          CONTACT
@@ -1126,7 +1224,7 @@
             const imgHTML = p.image
                 ? `<img src="${p.image}" alt="Image non trouvée: ${p.image}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='https://placehold.co/400x400?text=Introuvable'">`
                 : `<span class="no-img">🖨️</span>`;
-            return `<div class="prod-card">
+            return `<div class="prod-card" style="cursor:pointer;" onclick="window.location='/product/${p.id}'">
                 <div class="prod-img">
                     <span class="prod-badge ${badgeCls}">${badgeTxt}</span>
                     ${imgHTML}
@@ -1139,9 +1237,14 @@
                         <span class="prod-price">${Number(p.price).toLocaleString('fr-FR')} GNF</span>
                         ${oldHTML}
                     </div>
-                    <button class="prod-btn" onclick="addToCart(${p.id})">
-                        <i class="fas fa-shopping-bag mr-1"></i> Ajouter
-                    </button>
+                    <div class="prod-btns">
+                        <button class="prod-btn" onclick="event.stopPropagation();addToCart(${p.id})">
+                            <i class="fas fa-shopping-bag mr-1"></i> Panier
+                        </button>
+                        <button class="prod-btn-order" onclick="event.stopPropagation();orderNow(${p.id})">
+                            <i class="fas fa-bolt mr-1"></i> Commander
+                        </button>
+                    </div>
                 </div>
             </div>`;
         }
@@ -1283,6 +1386,49 @@
                 showToast('Produit ajouté au panier !');
             })
             .catch(() => showToast('Impossible d\'ajouter ce produit.', 'error'));
+        }
+
+        function orderNow(id) {
+            // Ajouter au panier en premier
+            fetch(`{{ url('/cart/add') }}/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                console.log('Product added to cart:', data);
+                // Mettre à jour le compteur du panier
+                const badge = document.getElementById('cart-count');
+                if (badge && data.count !== undefined) {
+                    badge.textContent = data.count;
+                    badge.style.transform = 'scale(1.3)';
+                    setTimeout(() => {
+                        badge.style.transform = 'scale(1)';
+                    }, 300);
+                }
+                showToast('Produit ajouté ! Redirection...');
+                
+                // Vérifier si l'utilisateur est connecté
+                @if(auth()->check() && auth()->user()->isCustomer())
+                    // Connecté : aller au checkout
+                    setTimeout(() => {
+                        window.location.href = '{{ route("checkout") }}';
+                    }, 500);
+                @else
+                    // Non connecté : rediriger vers login avec product_id
+                    setTimeout(() => {
+                        window.location.href = '{{ route("otp.login") }}?product_id=' + id;
+                    }, 500);
+                @endif
+            })
+            .catch((err) => {
+                console.error('Erreur:', err);
+                showToast('Impossible de passer la commande', 'error');
+            });
         }
 
         /* ── Init ── */

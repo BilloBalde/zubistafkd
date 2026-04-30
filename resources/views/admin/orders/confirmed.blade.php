@@ -215,24 +215,34 @@
                         `;
                         
                         items.forEach((item, index) => {
+                            const remaining = item.quantity_remaining;
+                            const alreadyDone = item.quantity_delivered || 0;
                             itemsHTML += `
                                 <div class="delivery-item" style="margin-bottom: 14px; padding: 12px; background: #f9fafb; border-radius: 8px; border-left: 3px solid #f59e0b;">
-                                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                        <strong>${item.product_name}</strong>
-                                        <span style="color: #9ca3af;">Cmde: ${item.quantity}</span>
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                        <strong style="font-size:13px;">${item.product_name}</strong>
+                                        <span style="color: #9ca3af; font-size:12px;">Total commandé : ${item.quantity}</span>
                                     </div>
+                                    <div style="font-size:12px; color:#6b7280; margin-bottom:8px;">
+                                        Déjà livré : <strong style="color:#10b981;">${alreadyDone}</strong>
+                                        &nbsp;|&nbsp; Reste à livrer : <strong style="color:#f59e0b;">${remaining}</strong>
+                                    </div>
+                                    ${remaining > 0 ? `
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <label style="flex: 1; font-size: 13px; color: #6b7280;">Livré :</label>
-                                        <input type="number" 
-                                               name="quantities[${item.id}]" 
-                                               value="${item.quantity_delivered || 0}"
-                                               min="0" 
-                                               max="${item.quantity}"
-                                               class="form-control" 
-                                               style="width: 80px; padding: 6px; border: 1px solid #e5e7eb; border-radius: 6px;"
-                                               required>
-                                        <span style="color: #9ca3af;">/ ${item.quantity}</span>
+                                        <label style="font-size: 13px; color: #6b7280; min-width:110px;">Livrer maintenant :</label>
+                                        <input type="number"
+                                               name="quantities[${item.id}]"
+                                               value="${remaining}"
+                                               min="0"
+                                               max="${remaining}"
+                                               class="form-control"
+                                               style="width: 80px; padding: 6px; border: 1px solid #e5e7eb; border-radius: 6px;">
+                                        <span style="color: #9ca3af;">/ ${remaining}</span>
+                                    </div>` : `
+                                    <div style="font-size:12px; color:#10b981; font-weight:600;">
+                                        <i class="fas fa-check-circle"></i> Entièrement livré
                                     </div>
+                                    <input type="hidden" name="quantities[${item.id}]" value="0">`}
                                 </div>
                             `;
                         });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Store;
 
 use Illuminate\Http\Request;
 
@@ -47,16 +48,21 @@ class VisitController extends Controller
     private function groupedCategories(): \Illuminate\Support\Collection
     {
         return Category::withCount('products')
+            ->with(['products' => fn($q) => $q->whereNotNull('image')->select('products.id', 'products.image')])
             ->get()
             ->groupBy('category_type')
             ->map(function ($group, $type) {
-                $withImage = $group->first(fn($c) => !empty($c->image));
+                $firstProductImage = null;
+                foreach ($group as $cat) {
+                    $img = $cat->products->first()?->image;
+                    if ($img) { $firstProductImage = $img; break; }
+                }
                 return (object)[
                     'name'           => $type,
                     'category_type'  => $type,
                     'products_count' => $group->sum('products_count'),
-                    'image'          => $withImage?->image ?? null,
-                    'image_url'      => $withImage ? asset('categories/' . $withImage->image) : null,
+                    'image'          => $firstProductImage,
+                    'image_url'      => $firstProductImage ? asset('products/' . $firstProductImage) : null,
                 ];
             })
             ->sortBy('name')
@@ -97,12 +103,25 @@ class VisitController extends Controller
         $totalCategories = $categories->count();
         $totalProducts   = Product::count();
 
+        $stores = Store::with('manager')->get()->map(function ($s) {
+            return (object)[
+                'id'          => $s->id,
+                'name'        => $s->store_name,
+                'address'     => $s->address,
+                'description' => $s->description,
+                'image_url'   => $s->store_picture ? asset('stores/' . $s->store_picture) : null,
+                'manager'     => $s->manager?->name,
+                'phone'       => $s->phone ?? $s->manager?->phone,
+            ];
+        })->values();
+
         return [
             'categories'      => $categories,
             'totalCategories' => $totalCategories,
             'totalProducts'   => $totalProducts,
+            'stores'          => $stores,
             'allProducts'  => Product::with('categories')->latest()->get()->map($mapProduct)->values(),
-            'bestProducts' => Product::with('categories')->orderByDesc('rating')->take(10)->get()->map($mapProduct)->values(),
+            'bestProducts' => Product::with('categories')->orderByDesc('rating')->get()->map($mapProduct)->values(),
             'promoProducts'=> Product::with('categories')->whereNotNull('promo_price')->get()->map($mapPromo)->values(),
         ];
     }

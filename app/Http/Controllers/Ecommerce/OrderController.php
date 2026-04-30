@@ -21,29 +21,36 @@ class OrderController extends Controller
         private OrangeMoneyService $orangeMoney,
     ) {}
 
+    public function buyNow($id)
+    {
+        $product = Product::findOrFail($id);
+        session(['buy_now' => [['product_id' => $product->id, 'quantity' => 1]]]);
+        return redirect()->route('checkout');
+    }
+
     public function checkout()
     {
         $user = Auth::user();
         $addresses = $user->addresses;
-        
-        // Simuler la récupération du panier (Session ou DB)
-        $cartItems = session()->get('cart', []);
-        
+
+        $isBuyNow  = session()->has('buy_now');
+        $cartItems = $isBuyNow ? session('buy_now') : session()->get('cart', []);
+
         if (empty($cartItems)) {
             return redirect()->route('shop.home')->with('error', 'Votre panier est vide.');
         }
 
         $products = Product::whereIn('id', array_column($cartItems, 'product_id'))->get();
         $total = 0;
-        foreach($products as $product) {
-            foreach($cartItems as $item) {
+        foreach ($products as $product) {
+            foreach ($cartItems as $item) {
                 if ($item['product_id'] == $product->id) {
                     $total += $product->price * $item['quantity'];
                 }
             }
         }
 
-        return view('ecommerce.checkout', compact('addresses', 'cartItems', 'products', 'total'));
+        return view('ecommerce.checkout', compact('addresses', 'cartItems', 'products', 'total', 'isBuyNow'));
     }
 
     public function store(OrderRequest $request)
@@ -58,8 +65,10 @@ class OrderController extends Controller
         // Notification de commande passée
         Auth::user()->notify(new OrderPlacedNotification($order));
 
-        // Vider le panier
-        session()->forget('cart');
+        // Vider le panier ou la session buy_now selon le cas
+        $request->boolean('is_buy_now')
+            ? session()->forget('buy_now')
+            : session()->forget('cart');
 
         // Orange Money → initier le paiement et rediriger vers la page Orange
         if ($request->payment_method === 'orange_money') {

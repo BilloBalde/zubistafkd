@@ -216,19 +216,30 @@
                     .then(items => {
                         let html = `<div><p style="margin-bottom:16px;color:#6b7280;">Indiquez la quantité livrée pour chaque article :</p><form id="delivery-form">`;
                         items.forEach(item => {
+                            const remaining = item.quantity_remaining;
+                            const alreadyDone = item.quantity_delivered || 0;
                             html += `
                                 <div style="margin-bottom:12px;padding:12px;background:#f9fafb;border-radius:8px;border-left:3px solid #f59e0b;">
                                     <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
                                         <strong style="font-size:13px;">${item.product_name}</strong>
-                                        <span style="color:#9ca3af;font-size:12px;">Commandé: ${item.quantity}</span>
+                                        <span style="color:#9ca3af;font-size:12px;">Total commandé : ${item.quantity}</span>
                                     </div>
+                                    <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">
+                                        Déjà livré : <strong style="color:#10b981;">${alreadyDone}</strong>
+                                        &nbsp;|&nbsp; Reste à livrer : <strong style="color:#f59e0b;">${remaining}</strong>
+                                    </div>
+                                    ${remaining > 0 ? `
                                     <div style="display:flex;align-items:center;gap:8px;">
-                                        <label style="font-size:13px;color:#6b7280;min-width:60px;">Livré :</label>
+                                        <label style="font-size:13px;color:#6b7280;min-width:110px;">Livrer maintenant :</label>
                                         <input type="number" name="quantities[${item.id}]"
-                                               value="${item.quantity_delivered || 0}" min="0" max="${item.quantity}"
-                                               class="form-control" style="width:80px;" required>
-                                        <span style="color:#9ca3af;">/ ${item.quantity}</span>
+                                               value="${remaining}" min="0" max="${remaining}"
+                                               class="form-control" style="width:80px;">
+                                        <span style="color:#9ca3af;">/ ${remaining}</span>
+                                    </div>` : `
+                                    <div style="font-size:12px;color:#10b981;font-weight:600;">
+                                        <i class="fas fa-check-circle"></i> Entièrement livré
                                     </div>
+                                    <input type="hidden" name="quantities[${item.id}]" value="0">`}
                                 </div>`;
                         });
                         html += `</form></div>`;

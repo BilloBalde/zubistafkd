@@ -46,9 +46,9 @@ class FactureController extends Controller
 
         if (auth()->user()->role_id == 3) {
             $dataTable = $query->where('store_id', Store::where('user_id', auth()->user()->id)->first()?->id)
-                ->with('customer', 'store')->get();
+                ->with('customer', 'store')->latest()->get();
         } else {
-            $dataTable = $query->with('customer', 'store')->get();
+            $dataTable = $query->with('customer', 'store')->latest()->get();
         }
 
         return view('factures.index', compact('dataTable', 'customers',));

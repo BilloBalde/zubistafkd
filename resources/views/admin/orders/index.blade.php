@@ -157,7 +157,7 @@
                             </h5>
                             <p class="text-white-50 mb-0" style="font-size:13px;" id="modalOrderLabel"></p>
                         </div>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fermer">
+                        <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Fermer">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -202,7 +202,7 @@
                     </div>
 
                     <div class="modal-footer" style="border-top:1px solid #f3f4f6;padding:16px 24px;">
-                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
                         <button type="button" id="confirmApproveBtn" class="btn btn-success btn-sm" disabled>
                             <i class="fas fa-check mr-1"></i> Confirmer l'approbation
                         </button>
@@ -268,7 +268,7 @@ $(document).on('click', '.btn-reject', function() {
                 $('#approveModal').modal('show');
             });
             // Fermeture manuelle de la modale
-            $('#approveModal .close, #approveModal button[data-dismiss="modal"]').on('click', function(e) {
+            $('#approveModal .close, #approveModal button[data-bs-dismiss="modal"]').on('click', function(e) {
                 e.preventDefault();
                 $('#approveModal').modal('hide');
             });

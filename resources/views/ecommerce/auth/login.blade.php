@@ -8,6 +8,13 @@
         <h1 class="text-xl font-bold text-gray-900 text-center mb-2">Connexion</h1>
         <p class="text-sm text-gray-600 text-center mb-6">Entrez votre numéro pour recevoir un code par SMS</p>
 
+        @if (session()->has('buy_now_product_id'))
+        <div class="mb-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm flex items-center gap-2">
+            <i class="fas fa-info-circle"></i>
+            <span>Après connexion, vous serez redirigé(e) vers le checkout pour finaliser votre commande.</span>
+        </div>
+        @endif
+
         @if ($errors->any())
             <div class="mb-4 rounded-lg bg-red-50 border border-red-200 text-red-800 px-4 py-3 text-sm">
                 {{ $errors->first() }}

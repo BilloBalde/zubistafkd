@@ -137,7 +137,12 @@ class PaymentController extends Controller
                 }
         
                 session(['success' => $sms]);
-                return redirect()->route('factures.index');
+
+                // Rediriger vers la liste des factures commandes si c'est une facture e-commerce
+                $isOrderFacture = str_starts_with($facture->numero_facture, 'INV-');
+                return $isOrderFacture
+                    ? redirect()->route('admin.orders.factures')->with('success', $sms)
+                    : redirect()->route('factures.index');
         
             } catch (\Throwable $th) {
                 return back()->with('fall', 'Une erreur lors de l\'ajout : ' . $th->getMessage());

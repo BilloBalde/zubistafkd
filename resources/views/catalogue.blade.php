@@ -105,8 +105,9 @@
         .prod-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
         .prod-price { font-size: 17px; font-weight: 700; color: #d97706; }
         .prod-price-old { font-size: 12px; color: #9ca3af; text-decoration: line-through; }
+        .prod-btns { display: flex; gap: 6px; }
         .prod-btn {
-            display: block; width: 100%; padding: 9px; font-size: 12px;
+            flex: 1; padding: 9px 4px; font-size: 11px;
             font-weight: 600; text-align: center;
             background: linear-gradient(135deg, #f5a962, #d97706);
             color: #fff; border: none; border-radius: 10px; cursor: pointer;
@@ -114,6 +115,14 @@
             font-family: 'Poppins', sans-serif;
         }
         .prod-btn:hover { opacity: 0.88; transform: scale(1.02); }
+        .prod-btn-order {
+            flex: 1; padding: 9px 4px; font-size: 11px;
+            font-weight: 600; text-align: center;
+            background: none; color: #d97706;
+            border: 2px solid #d97706; border-radius: 10px; cursor: pointer;
+            transition: all 0.2s; font-family: 'Poppins', sans-serif;
+        }
+        .prod-btn-order:hover { background: #d97706; color: #fff; transform: scale(1.02); }
 
         .empty-state { text-align: center; padding: 4rem 1rem; color: #9ca3af; font-size: 14px; }
         .empty-state i { font-size: 40px; margin-bottom: 16px; display: block; color: #d1d5db; }
@@ -329,7 +338,7 @@
                 : `<span class="no-img">🌿</span>`;
             const badge = badgeTxt
                 ? `<span class="prod-badge ${badgeCls}">${badgeTxt}</span>` : '';
-            return `<div class="prod-card">
+            return `<div class="prod-card" onclick="window.location='/product/${p.id}'" style="cursor:pointer;">
                 <div class="prod-img">
                     ${badge}
                     ${imgHTML}
@@ -341,9 +350,14 @@
                         <span class="prod-price">${Number(p.price).toLocaleString('fr-FR')} GNF</span>
                         ${oldHTML}
                     </div>
-                    <button class="prod-btn" onclick="addToCart(${p.id})">
-                        <i class="fas fa-shopping-bag mr-1"></i> Ajouter au panier
-                    </button>
+                    <div class="prod-btns">
+                        <button class="prod-btn" onclick="event.stopPropagation();addToCart(${p.id})">
+                            <i class="fas fa-shopping-bag mr-1"></i> Panier
+                        </button>
+                        <button class="prod-btn-order" onclick="event.stopPropagation();orderNow(${p.id})">
+                            <i class="fas fa-bolt mr-1"></i> Commander
+                        </button>
+                    </div>
                 </div>
             </div>`;
         }
@@ -422,6 +436,14 @@
             document.getElementById('max-price').value = '';
             document.getElementById('sort-select').selectedIndex = 0;
             applyFilters();
+        }
+
+        function orderNow(id) {
+            @if(auth()->check() && auth()->user()->isCustomer())
+                window.location.href = '{{ url("/shop/buy-now") }}/' + id;
+            @else
+                window.location.href = '{{ route("otp.login") }}';
+            @endif
         }
 
         function addToCart(id) {

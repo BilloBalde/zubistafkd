@@ -9,6 +9,9 @@
 
     <form action="{{ route('orders.store') }}" method="POST" class="space-y-8" enctype="multipart/form-data">
         @csrf
+        @if($isBuyNow ?? false)
+            <input type="hidden" name="is_buy_now" value="1">
+        @endif
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
                 <!-- Adresse -->

@@ -36,6 +36,9 @@ class AuthOtpController extends Controller
         if ($request->query('redirect')) {
             session(['auth_redirect' => $request->query('redirect')]);
         }
+        if ($request->query('product_id')) {
+            session(['buy_now_product_id' => $request->query('product_id')]);
+        }
         return view('ecommerce.auth.login');
     }
 
@@ -78,6 +81,12 @@ class AuthOtpController extends Controller
             Auth::login($user);
 
             $redirect = session()->pull('auth_redirect');
+            $buyNowProductId = session()->pull('buy_now_product_id');
+
+            // Si l'utilisateur venait de cliquer "Commander", rediriger vers checkout
+            if ($buyNowProductId) {
+                return redirect()->route('checkout')->with('success', 'Bienvenue ! Veuillez confirmer votre commande.');
+            }
 
             if ($redirect === 'checkout') {
                 return redirect()->route('checkout')->with('success', 'Bienvenue !');

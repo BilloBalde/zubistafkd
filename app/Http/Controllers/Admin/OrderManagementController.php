@@ -224,37 +224,70 @@ class OrderManagementController extends Controller
     public function getFactureItems(Facture $facture)
     {
         $order = $facture->order;
-        $items = $order->items->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'product_name' => $item->product->libelle ?? 'Produit #'.$item->product_id,
-                'quantity' => $item->quantity,
-                'quantity_delivered' => $item->quantity_delivered ?? 0,
-            ];
-        });
+
+        if (!$order) {
+            return response()->json(['error' => 'Commande introuvable pour cette facture.'], 404);
+        }
+
+        $order->load('items.product');
+
+        $items = $order->items->map(fn($item) => [
+            'id'                 => $item->id,
+            'product_name'       => $item->product->libelle ?? 'Produit #' . $item->product_id,
+            'quantity'           => $item->quantity,
+            'quantity_delivered' => $item->quantity_delivered ?? 0,
+            'quantity_remaining' => max(0, $item->quantity - ($item->quantity_delivered ?? 0)),
+        ]);
+
         return response()->json($items);
     }
 
     /**
-     * Enregistre une livraison partielle (utilisation optionnelle)
+     * Enregistre une livraison partielle
      */
     public function partialDeliver(Request $request, Facture $facture)
     {
-        $quantities = $request->input('quantities', []);
-        foreach ($quantities as $itemId => $deliveredQty) {
-            OrderItem::where('id', $itemId)->update([
-                'quantity_delivered' => $deliveredQty
-            ]);
-        }
         $order = $facture->order;
-        $totalDelivered = $order->items->sum('quantity_delivered');
-        $totalOrdered = $order->items->sum('quantity');
-        if ($totalDelivered >= $totalOrdered) {
-            $facture->update(['livraison' => 'livré']);
-        } else {
-            $facture->update(['livraison' => 'partiellement livré']);
+
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Commande introuvable.'], 404);
         }
-        return response()->json(['success' => true]);
+
+        try {
+            $quantities = $request->input('quantities', []);
+
+            foreach ($quantities as $itemId => $newQty) {
+                $item = OrderItem::where('id', $itemId)
+                    ->where('order_id', $order->id)
+                    ->first();
+
+                if (!$item) continue;
+
+                // Additionner la nouvelle livraison à ce qui était déjà livré, sans dépasser le total commandé
+                $item->quantity_delivered = min(
+                    $item->quantity_delivered + (int) $newQty,
+                    $item->quantity
+                );
+                $item->save();
+            }
+
+            // Requête fraîche après les mises à jour (évite le cache Eloquent)
+            $totalDelivered = $order->items()->sum('quantity_delivered');
+            $totalOrdered   = $order->items()->sum('quantity');
+
+            if ($totalOrdered > 0 && $totalDelivered >= $totalOrdered) {
+                $facture->update(['livraison' => 'livré']);
+            } elseif ($totalDelivered > 0) {
+                $facture->update(['livraison' => 'partiellement livré']);
+            } else {
+                $facture->update(['livraison' => 'non livré']);
+            }
+
+            return response()->json(['success' => true]);
+
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**

@@ -54,6 +54,9 @@
             text-decoration: none;
         }
         .btn-back:hover { color: #d97706; border-color: #f59e0b; }
+        #cart-count {
+            transition: transform 0.3s ease;
+        }
 
         /* Cartes produits similaires */
         .rel-card {
@@ -128,7 +131,7 @@
                 @endauth
                 <a href="{{ route('panier') }}" class="relative p-2 text-gray-700 hover:text-amber-600 transition">
                     <i class="fas fa-shopping-bag text-xl"></i>
-                    <span class="absolute top-0 right-0 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    <span id="cart-count" class="absolute top-0 right-0 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                         {{ count(session('cart', [])) }}
                     </span>
                 </a>
@@ -230,10 +233,16 @@
                         @endif
                     </div>
 
-                    <button class="btn-cart" onclick="addToCart({{ $product->id }}, this)">
-                        <i class="fas fa-shopping-bag"></i>
-                        Ajouter au panier
-                    </button>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="btn-cart" onclick="addToCart({{ $product->id }}, this)">
+                            <i class="fas fa-shopping-bag"></i>
+                            Ajouter
+                        </button>
+                        <button class="btn-cart bg-gradient-to-r from-green-500 to-green-600" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="buyNow({{ $product->id }}, this)">
+                            <i class="fas fa-bolt"></i>
+                            Commander
+                        </button>
+                    </div>
 
                     <a href="{{ url()->previous() === url()->current() ? route('accueil') : url()->previous() }}"
                        class="btn-back mt-3 w-full justify-center">
@@ -290,36 +299,107 @@
 <script>
 function addToCart(id, btn) {
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout...'; }
-    fetch('/cart/add', {
+    fetch(`{{ url('/cart/add') }}/${id}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({ product_id: id, quantity: 1 })
-    })
-    .then(r => r.json())
-    .then(data => {
-        showToast(data.message || 'Produit ajouté au panier');
-        if (data.cart_count !== undefined) {
-            document.querySelectorAll('#cart-count, [id="cart-count"]').forEach(el => el.textContent = data.cart_count);
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'X-Requested-With': 'XMLHttpRequest'
         }
     })
-    .catch(() => showToast('Produit ajouté au panier'))
+    .then(response => {
+        if (!response.ok) throw new Error();
+        return response.json();
+    })
+    .then(data => {
+        showToast(data.message || 'Produit ajouté au panier !');
+        // Mettre à jour le compteur du panier avec animation
+        console.log('Cart count:', data.count);
+        if (data.count !== undefined) {
+            document.querySelectorAll('#cart-count').forEach(el => {
+                console.log('Updating cart badge to:', data.count);
+                el.textContent = data.count;
+                el.style.transform = 'scale(1.3)';
+                setTimeout(() => {
+                    el.style.transform = 'scale(1)';
+                }, 300);
+            });
+        }
+    })
+    .catch(err => {
+        console.error('Erreur lors de l\'ajout au panier:', err);
+        showToast('Impossible d\'ajouter ce produit.', 'error');
+    })
     .finally(() => {
         if (btn) {
             setTimeout(() => {
                 btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Ajouter au panier';
+                btn.innerHTML = '<i class="fas fa-shopping-bag"></i> Ajouter';
             }, 1200);
         }
     });
 }
 
-function showToast(msg) {
+function buyNow(id, btn) {
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...'; }
+    
+    // Ajouter au panier et rediriger
+    fetch(`{{ url('/cart/add') }}/${id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        console.log('Response:', response);
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(data => {
+        console.log('Data received:', data);
+        // Mettre à jour le compteur du panier
+        if (data.count !== undefined) {
+            document.querySelectorAll('#cart-count').forEach(el => {
+                el.textContent = data.count;
+                el.style.transform = 'scale(1.3)';
+                setTimeout(() => {
+                    el.style.transform = 'scale(1)';
+                }, 300);
+            });
+        }
+        showToast('Produit ajouté ! Redirection vers la connexion...');
+        // Rediriger vers la page de login avec l'ID du produit
+        const loginUrl = '{{ route("otp.login") }}?product_id=' + id;
+        console.log('Redirecting to:', loginUrl);
+        setTimeout(() => {
+            window.location.href = loginUrl;
+        }, 500);
+    })
+    .catch((error) => {
+        console.error('Erreur:', error);
+        showToast('Impossible de passer la commande : ' + error.message, 'error');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-bolt"></i> Commander';
+        }
+    });
+}
+
+function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
-    document.getElementById('toast-msg').textContent = msg;
+    const msgEl = document.getElementById('toast-msg');
+    msgEl.textContent = msg;
     t.classList.add('show');
+    
+    // Changer la couleur selon le type
+    if (type === 'error') {
+        t.style.background = '#ef4444';
+    } else {
+        t.style.background = '#1f2937';
+    }
+    
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 </script>

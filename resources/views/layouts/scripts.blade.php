@@ -45,7 +45,7 @@
                     titleAttr: 'Export to Excel'
                 }
             ], */
-            order: [[0, 'desc']],
+            order: [],
             /* initComplete: function() {
                 // Move the DataTable export buttons to the specific container
                 $('.dt-buttons').appendTo('#exportButtonsContainer');
