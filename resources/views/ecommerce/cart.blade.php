@@ -34,7 +34,21 @@
                                 </div>
                             </td>
                             <td class="px-4 py-4 text-sm text-gray-700 text-right whitespace-nowrap">{{ number_format($details['price'], 0, ',', ' ') }} GNF</td>
-                            <td class="px-4 py-4 text-sm text-gray-700 text-right">{{ $details['quantity'] }}</td>
+                            <td class="px-4 py-4 text-right">
+                                <div class="inline-flex items-center gap-1 border border-gray-200 rounded-lg overflow-hidden">
+                                    <form method="POST" action="{{ route('cart.update', $id) }}">
+                                        @csrf
+                                        <input type="hidden" name="action" value="decrease">
+                                        <button type="submit" class="w-8 h-8 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition font-bold text-base">−</button>
+                                    </form>
+                                    <span class="w-8 text-center text-sm font-semibold text-gray-800">{{ $details['quantity'] }}</span>
+                                    <form method="POST" action="{{ route('cart.update', $id) }}">
+                                        @csrf
+                                        <input type="hidden" name="action" value="increase">
+                                        <button type="submit" class="w-8 h-8 flex items-center justify-center text-amber-600 hover:bg-amber-50 transition font-bold text-base">+</button>
+                                    </form>
+                                </div>
+                            </td>
                             <td class="px-4 py-4 text-sm font-medium text-gray-900 text-right whitespace-nowrap">{{ number_format($details['price'] * $details['quantity'], 0, ',', ' ') }} GNF</td>
                             <td class="px-4 py-4 text-right">
                                 <a href="{{ route('cart.remove', $id) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-red-600 hover:bg-red-50 transition" title="Retirer">
@@ -57,13 +71,56 @@
     @endphp
 
     @if(count($cart) > 0)
+        @php
+            $cartTotalQty = array_sum(array_column($cart, 'quantity'));
+            $cartDiscount = $cartTotalQty >= $discountThreshold ? (int)($total * $discountRate) : 0;
+            $cartFinal    = max(0, $total - $cartDiscount);
+            $remaining    = max(0, $discountThreshold - $cartTotalQty);
+            $discountPct  = (int)($discountRate * 100);
+        @endphp
+
+        {{-- Bannière réduction --}}
+        @if($cartDiscount > 0)
+        <div class="mt-6 flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+            <div class="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-tag text-green-600"></i>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-green-800">Réduction de {{ $discountPct }}% appliquée !</p>
+                <p class="text-xs text-green-600">Vous avez {{ $cartTotalQty }} produits dans votre panier — réduction automatique activée.</p>
+            </div>
+            <span class="ml-auto text-green-700 font-bold text-sm whitespace-nowrap">−{{ number_format($cartDiscount, 0, ',', ' ') }} GNF</span>
+        </div>
+        @else
+        <div class="mt-6 flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+            <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-gift text-amber-600"></i>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-amber-800">
+                    Plus que {{ $remaining }} produit{{ $remaining > 1 ? 's' : '' }} pour obtenir −{{ $discountPct }}% sur votre commande !
+                </p>
+                <div class="mt-1.5 h-2 bg-amber-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-amber-500 rounded-full transition-all"
+                         style="width: {{ min(100, ($cartTotalQty / $discountThreshold) * 100) }}%"></div>
+                </div>
+                <p class="text-xs text-amber-600 mt-1">{{ $cartTotalQty }}/{{ $discountThreshold }} produits</p>
+            </div>
+        </div>
+        @endif
+
         <div class="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
             <a href="{{ $continueUrl }}" class="inline-flex justify-center items-center px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition">
                 Continuer mes achats
             </a>
             <div class="text-right">
-                <p class="text-sm text-gray-600 mb-1">Total</p>
-                <p class="text-2xl font-bold text-amber-600 mb-4">{{ number_format($total, 0, ',', ' ') }} GNF</p>
+                @if($cartDiscount > 0)
+                    <p class="text-sm text-gray-400 line-through mb-0.5">{{ number_format($total, 0, ',', ' ') }} GNF</p>
+                    <p class="text-xs text-green-600 font-medium mb-1">− {{ $discountPct }}% de réduction ({{ number_format($cartDiscount, 0, ',', ' ') }} GNF)</p>
+                @else
+                    <p class="text-sm text-gray-600 mb-1">Total</p>
+                @endif
+                <p class="text-2xl font-bold text-amber-600 mb-4">{{ number_format($cartFinal, 0, ',', ' ') }} GNF</p>
                 @auth
                     @if(Auth::user()->isCustomer())
                         <a href="{{ route('checkout') }}" class="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold shadow-md hover:opacity-95 transition">

@@ -67,7 +67,7 @@
                                             @enderror
                                             @if(isset($categoryEmballage) && $categoryEmballage->image)
                                             <div class="mt-2">
-                                                <img id="cat-img-preview" src="{{ asset('categories/' . $categoryEmballage->image) }}" alt="Image actuelle" style="width:100px;height:100px;object-fit:cover;border-radius:8px;">
+                                                <img id="cat-img-preview" src="{{ asset('cat-images/' . $categoryEmballage->image) }}" alt="Image actuelle" style="width:100px;height:100px;object-fit:cover;border-radius:8px;">
                                             </div>
                                             @else
                                             <div class="mt-2">

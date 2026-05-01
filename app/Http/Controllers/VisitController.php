@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Store;
-
+use App\Services\SeasonalPromoService;
 use Illuminate\Http\Request;
 
 class VisitController extends Controller
@@ -87,15 +87,17 @@ class VisitController extends Controller
         };
 
         $mapPromo = function ($p) use ($getCategoryName) {
+            $promoPrice = $p->promo_price ?? $p->sale_price;
             return [
                 'id'            => $p->id,
                 'name'          => $p->libelle ?? $p->name,
                 'category_name' => $getCategoryName($p),
-                'price'         => (float) ($p->promo_price ?? $p->price),
-                'old_price'     => (float) $p->price,
-                'discount'      => $p->promo_price ? round((1 - $p->promo_price / $p->price) * 100) : 0,
+                'price'         => (float) ($promoPrice ?? $p->price),
+                'old_price'     => $promoPrice ? (float) $p->price : null,
+                'discount'      => $promoPrice ? round((1 - $promoPrice / $p->price) * 100) : ($p->discount_percent ?? 0),
                 'rating'        => (float) ($p->rating ?? 4.5),
                 'image'         => $p->image ? asset('products/' . $p->image) : null,
+                'promo_ends_at' => $p->promo_ends_at?->toIso8601String(),
             ];
         };
 
@@ -115,14 +117,17 @@ class VisitController extends Controller
             ];
         })->values();
 
+        $seasonalEvent = app(SeasonalPromoService::class)->currentEvent();
+
         return [
             'categories'      => $categories,
             'totalCategories' => $totalCategories,
             'totalProducts'   => $totalProducts,
             'stores'          => $stores,
+            'seasonalEvent'   => $seasonalEvent,
             'allProducts'  => Product::with('categories')->latest()->get()->map($mapProduct)->values(),
             'bestProducts' => Product::with('categories')->orderByDesc('rating')->get()->map($mapProduct)->values(),
-            'promoProducts'=> Product::with('categories')->whereNotNull('promo_price')->get()->map($mapPromo)->values(),
+            'promoProducts'=> Product::with('categories')->activePromo()->get()->map($mapPromo)->values(),
         ];
     }
 

@@ -41,16 +41,32 @@ class OrderController extends Controller
         }
 
         $products = Product::whereIn('id', array_column($cartItems, 'product_id'))->get();
-        $total = 0;
+
+        $subtotal = 0;
+        $totalQty = 0;
         foreach ($products as $product) {
             foreach ($cartItems as $item) {
                 if ($item['product_id'] == $product->id) {
-                    $total += $product->price * $item['quantity'];
+                    $unitPrice = $product->promo_price ?? $product->price;
+                    $subtotal += $unitPrice * $item['quantity'];
+                    $totalQty += $item['quantity'];
                 }
             }
         }
 
-        return view('ecommerce.checkout', compact('addresses', 'cartItems', 'products', 'total', 'isBuyNow'));
+        $discount = $totalQty >= \App\Services\OrderService::DISCOUNT_THRESHOLD
+            ? (int)($subtotal * \App\Services\OrderService::DISCOUNT_RATE)
+            : 0;
+        $total = max(0, $subtotal - $discount);
+
+        $discountRate      = \App\Services\OrderService::DISCOUNT_RATE;
+        $discountThreshold = \App\Services\OrderService::DISCOUNT_THRESHOLD;
+
+        return view('ecommerce.checkout', compact(
+            'addresses', 'cartItems', 'products',
+            'subtotal', 'discount', 'total', 'totalQty', 'isBuyNow',
+            'discountRate', 'discountThreshold'
+        ));
     }
 
     public function store(OrderRequest $request)

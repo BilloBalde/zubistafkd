@@ -24,6 +24,9 @@
       "Bash(curl -s -o /dev/null -w \"GET /contact → %{http_code}\\\\n\" http://127.0.0.1:8003/contact)",
       "Bash(curl -s -o /dev/null -w \"GET /catalogue → %{http_code}\\\\n\" http://127.0.0.1:8003/catalogue)",
       "Bash(php -r ' *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\hp\\Zubista\\FBK-printing\\public"
     ]
   }
 }

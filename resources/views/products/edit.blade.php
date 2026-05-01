@@ -125,8 +125,50 @@
                                         </div>
                                     </div>
 
+                                    <!-- ── Section Promotion ── -->
+                                    <div class="col-12 mt-3">
+                                        <div class="card" style="border:2px solid #f59e0b;border-radius:12px;">
+                                            <div class="card-header d-flex align-items-center gap-3" style="background:#fffbeb;border-bottom:1px solid #fde68a;">
+                                                <div class="form-check form-switch mb-0">
+                                                    <input class="form-check-input" type="checkbox" id="is_promo" name="is_promo" value="1"
+                                                           {{ old('is_promo', $product->is_promo) ? 'checked' : '' }}
+                                                           onchange="togglePromoSection(this)">
+                                                    <label class="form-check-label fw-bold" for="is_promo" style="color:#d97706;">
+                                                        🏷️ Mettre en promotion
+                                                    </label>
+                                                </div>
+                                                <small class="text-muted">Cochez pour activer une réduction sur ce produit</small>
+                                            </div>
+                                            <div class="card-body" id="promo-section" style="{{ old('is_promo', $product->is_promo) ? '' : 'display:none;' }}">
+                                                <div class="row g-3">
+                                                    <div class="col-lg-4 col-sm-6 col-12">
+                                                        <label class="form-label fw-semibold">Prix promotionnel (GNF)</label>
+                                                        <input type="number" id="promo_price" name="promo_price" class="form-control"
+                                                               placeholder="Ex: 22400"
+                                                               value="{{ old('promo_price', $product->promo_price) }}"
+                                                               min="0" oninput="updateDiscount()">
+                                                        <div id="discount-preview" class="mt-1" style="font-size:13px;color:#16a34a;font-weight:600;"></div>
+                                                    </div>
+                                                    <div class="col-lg-4 col-sm-6 col-12">
+                                                        <label class="form-label fw-semibold">Date de fin de promo</label>
+                                                        <input type="datetime-local" id="promo_ends_at" name="promo_ends_at" class="form-control"
+                                                               value="{{ old('promo_ends_at', $product->promo_ends_at ? \Carbon\Carbon::parse($product->promo_ends_at)->format('Y-m-d\TH:i') : '') }}">
+                                                        <small class="text-muted">Laisser vide = pas de date limite</small>
+                                                    </div>
+                                                    <div class="col-lg-4 col-sm-6 col-12 d-flex align-items-end">
+                                                        <div class="p-3 rounded" style="background:#f0fdf4;border:1px solid #86efac;width:100%;">
+                                                            <div style="font-size:12px;color:#6b7280;">Prix normal</div>
+                                                            <div style="font-size:18px;font-weight:700;color:#374151;" id="normal-price-display">{{ number_format($product->price, 0, ',', ' ') }} GNF</div>
+                                                            <div style="font-size:12px;color:#6b7280;margin-top:4px;">Réduction calculée automatiquement</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <!-- Submit and Cancel Buttons -->
-                                    <div class="col-lg-12">
+                                    <div class="col-lg-12 mt-3">
                                         <button type="submit" class="btn btn-submit me-2">Mettre à jour</button>
                                         <a href="{{ route('produits.index') }}" class="btn btn-cancel">Annuler</a>
                                     </div>
@@ -163,5 +205,35 @@
 
    </script>
         @include('layouts.scripts')
+        <script>
+            const normalPrice = {{ $product->price }};
+
+            function togglePromoSection(checkbox) {
+                document.getElementById('promo-section').style.display = checkbox.checked ? '' : 'none';
+                if (!checkbox.checked) {
+                    document.getElementById('promo_price').value = '';
+                    document.getElementById('promo_ends_at').value = '';
+                    document.getElementById('discount-preview').textContent = '';
+                }
+            }
+
+            function updateDiscount() {
+                const promoPrice = parseFloat(document.getElementById('promo_price').value);
+                const preview    = document.getElementById('discount-preview');
+                if (promoPrice > 0 && promoPrice < normalPrice) {
+                    const pct = Math.round((1 - promoPrice / normalPrice) * 100);
+                    preview.textContent = `✓ Réduction de ${pct}% (économie : ${(normalPrice - promoPrice).toLocaleString('fr-FR')} GNF)`;
+                    preview.style.color = '#16a34a';
+                } else if (promoPrice >= normalPrice) {
+                    preview.textContent = '⚠ Le prix promo doit être inférieur au prix normal.';
+                    preview.style.color = '#dc2626';
+                } else {
+                    preview.textContent = '';
+                }
+            }
+
+            // Calcul initial si déjà en promo
+            updateDiscount();
+        </script>
     </body>
 </html>

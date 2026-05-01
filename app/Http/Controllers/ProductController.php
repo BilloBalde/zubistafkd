@@ -172,6 +172,15 @@ class ProductController extends Controller
             $product = Product::findOrFail($id);
             $product->update($request->except('categories', 'image'));
 
+            // Si le toggle promo est décoché, on efface les champs promo
+            if (!$request->boolean('is_promo')) {
+                $product->update([
+                    'is_promo'      => false,
+                    'promo_price'   => null,
+                    'promo_ends_at' => null,
+                ]);
+            }
+
             // Handle image upload
             if ($request->hasFile('image')) {
                 $productName = time().'.'.request()->image->getClientOriginalExtension();

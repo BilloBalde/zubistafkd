@@ -102,6 +102,7 @@ Route::get('/emailSetting', [EmailController::class, 'index'])->name('emailSetti
 
 Route::get('/panier', [CartController::class, 'show'])->name('panier');
 Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
 Route::get('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 
 Route::prefix('shop')->group(function () {

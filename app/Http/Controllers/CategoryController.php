@@ -44,7 +44,7 @@ class CategoryController extends Controller
             $data = $request->only(['slug', 'category_type', 'description']);
             if ($request->hasFile('image')) {
                 $imageName = time() . '.' . $request->image->getClientOriginalExtension();
-                $request->image->move(public_path('categories'), $imageName);
+                $request->image->move(public_path('cat-images'), $imageName);
                 $data['image'] = $imageName;
             }
             Category::create($data);
@@ -78,7 +78,7 @@ class CategoryController extends Controller
             $data = $request->only(['slug', 'category_type', 'description']);
             if ($request->hasFile('image')) {
                 $imageName = time() . '.' . $request->image->getClientOriginalExtension();
-                $request->image->move(public_path('categories'), $imageName);
+                $request->image->move(public_path('cat-images'), $imageName);
                 $data['image'] = $imageName;
             }
             $categoryEmballage->update($data);

@@ -21,7 +21,7 @@
         /* ── Hero ── */
         .hero-section {
             background: linear-gradient(135deg, #1a0a00 0%, #3d1a00 40%, #6b3200 70%, #d4753c 100%);
-            min-height: 620px;
+            min-height: 700px;
             position: relative;
             overflow: hidden;
         }
@@ -45,7 +45,7 @@
         .hero-carousel {
             position: relative;
             width: 100%;
-            height: 420px;
+            height: 560px;
         }
         .hero-slide {
             position: absolute; inset: 0;
@@ -132,7 +132,7 @@
         }
         @media (max-width: 768px) {
             .floating-card { display: none; }
-            .hero-carousel { height: 280px; }
+            .hero-carousel { height: 340px; }
         }
 
         /* ── Misc helpers ── */
@@ -332,8 +332,10 @@
             background: #fafafa;
             overflow: hidden;
         }
-        .prod-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .prod-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s, filter 0.3s; }
         .prod-card:hover .prod-img img { transform: scale(1.05); }
+        .prod-img img.lazy { filter: blur(10px); opacity: 0.7; }
+        .prod-img img.lazy.loaded { filter: blur(0); opacity: 1; }
         .prod-img .no-img { font-size: 48px; }
         .prod-badge {
             position: absolute; top: 10px; left: 10px;
@@ -365,6 +367,12 @@
             font-size: 12px; color: #9ca3af;
             text-decoration: line-through;
         }
+        .promo-countdown {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 11px; font-weight: 600; color: #dc2626;
+            background: #fef2f2; border: 1px solid #fca5a5;
+            border-radius: 6px; padding: 3px 8px; margin-bottom: 8px;
+        }
         .prod-btns { display: flex; gap: 6px; }
         .prod-btn {
             flex: 1; padding: 9px 4px; font-size: 11px;
@@ -389,6 +397,209 @@
             color: #9ca3af; font-size: 14px;
         }
         .empty-state i { font-size: 32px; margin-bottom: 12px; display: block; color: #d1d5db; }
+
+        /* ── Section Vidéos ── */
+        .videos-section {
+            background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .videos-section::before {
+            content: '';
+            position: absolute; top: -150px; right: -100px;
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(245,169,98,0.12) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+            animation: float 20s ease-in-out infinite;
+        }
+        .videos-section::after {
+            content: '';
+            position: absolute; bottom: -100px; left: -50px;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(212,117,60,0.10) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+            animation: float 25s ease-in-out infinite reverse;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(20px); }
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            position: relative; z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        @media (max-width: 640px) {
+            .video-grid { grid-template-columns: 1fr; gap: 20px; }
+        }
+        .video-item {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            aspect-ratio: 16/9;
+            cursor: pointer;
+            border: 2px solid rgba(245,169,98,0.15);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.1);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(4px);
+        }
+        .video-item:hover {
+            transform: translateY(-8px);
+            border-color: rgba(245,169,98,0.4);
+            box-shadow: 0 24px 60px rgba(245,169,98,0.15), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+        .video-item video {
+            width: 100%; height: 100%;
+            object-fit: cover; display: block;
+        }
+        .video-overlay {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 100%);
+            transition: all 0.4s ease; z-index: 2;
+        }
+        .video-item.playing .video-overlay { opacity: 0; }
+        .video-item.playing:hover .video-overlay { opacity: 1; }
+        .video-play-btn {
+            width: 70px; height: 70px;
+            background: linear-gradient(135deg, #f5a962 0%, #d97706 100%);
+            border: none; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: #fff; cursor: pointer;
+            box-shadow: 0 8px 32px rgba(217,119,6,0.4), inset -2px -2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(4px);
+        }
+        .video-play-btn:hover {
+            transform: scale(1.18) !important;
+            box-shadow: 0 16px 48px rgba(217,119,6,0.5), inset -2px -2px 8px rgba(0,0,0,0.2);
+        }
+        .video-controls-bar {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 36px 16px 14px;
+            display: flex; align-items: center; gap: 12px;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 3;
+        }
+        .video-item:hover .video-controls-bar,
+        .video-item.playing .video-controls-bar { transform: translateY(0); }
+        .vid-ctrl-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.9);
+            font-size: 13px; cursor: pointer; padding: 6px 10px;
+            flex-shrink: 0; transition: all 0.25s;
+            line-height: 1; border-radius: 6px;
+            backdrop-filter: blur(4px);
+        }
+        .vid-ctrl-btn:hover { 
+            background: rgba(245,169,98,0.25);
+            color: #f5a962;
+            border-color: rgba(245,169,98,0.5);
+            transform: scale(1.08);
+        }
+        .vid-progress {
+            flex: 1; height: 5px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px; cursor: pointer; position: relative;
+            transition: height 0.2s; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .vid-progress:hover { 
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+        }
+        .vid-progress-fill {
+            height: 100%; background: linear-gradient(90deg, #f5a962, #d97706);
+            border-radius: 3px; width: 0%;
+            pointer-events: none; position: relative;
+            box-shadow: 0 0 12px rgba(245,169,98,0.5);
+        }
+        .vid-progress-fill::after {
+            content: '';
+            position: absolute; right: -6px; top: 50%;
+            transform: translateY(-50%);
+            width: 14px; height: 14px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 3px rgba(245,169,98,0.6);
+            opacity: 0;
+            transition: all 0.2s;
+        }
+        .vid-progress:hover .vid-progress-fill::after { 
+            opacity: 1;
+            transform: translateY(-50%) scale(1.15);
+        }
+        .vid-time {
+            font-size: 12px; color: rgba(255,255,255,0.85); font-weight: 600;
+            flex-shrink: 0; min-width: 42px; text-align: right;
+            background: rgba(255,255,255,0.05);
+            padding: 4px 8px; border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .video-label {
+            position: absolute; top: 14px; left: 14px; z-index: 4;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6), rgba(0,0,0,0.45));
+            color: #fff; font-size: 11px; font-weight: 700;
+            padding: 6px 14px; border-radius: 20px;
+            backdrop-filter: blur(8px);
+            border: 1.5px solid rgba(245,169,98,0.25);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        .video-item:hover .video-label {
+            background: linear-gradient(135deg, rgba(245,169,98,0.35), rgba(217,119,6,0.25));
+            border-color: rgba(245,169,98,0.5);
+        }
+        .video-num-badge {
+            position: absolute; top: 14px; right: 14px; z-index: 4;
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(245,169,98,0.3), rgba(217,119,6,0.2));
+            border: 1.5px solid rgba(245,169,98,0.6);
+            display: flex; align-items: center; justify-content: center;
+            color: #f5a962; font-size: 12px; font-weight: 700;
+            box-shadow: 0 4px 16px rgba(245,169,98,0.15);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+        .video-item:hover .video-num-badge {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, rgba(245,169,98,0.4), rgba(217,119,6,0.3));
+            border-color: rgba(245,169,98,0.8);
+        }
+        .videos-deco-line {
+            display: flex; align-items: center; justify-content: center; gap: 14px;
+            margin-bottom: 16px;
+        }
+        .videos-deco-line span {
+            display: inline-block; height: 2px; width: 52px;
+            background: linear-gradient(90deg, transparent, #f5a962);
+            border-radius: 2px;
+            animation: expandLine 0.8s ease-out;
+        }
+        .videos-deco-line span:last-child {
+            background: linear-gradient(90deg, #f5a962, transparent);
+        }
+        @keyframes expandLine {
+            from {
+                width: 0;
+                opacity: 0;
+            }
+            to {
+                width: 52px;
+                opacity: 1;
+            }
+        }
+        .video-section-title {
+            position: relative;
+            display: inline-block;
+        }
     </style>
 </head>
 <body class="bg-white">
@@ -464,10 +675,10 @@
     ══════════════════════════════════════════ --}}
     <section id="accueil" class="hero-section pt-28 pb-16">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="hero-content grid grid-cols-1 md:grid-cols-2 gap-12 items-center min-h-[500px]">
+            <div class="hero-content grid grid-cols-1 lg:grid-cols-5 gap-10 items-center min-h-[580px]">
 
                 {{-- ── Côté texte ── --}}
-                <div class="flex flex-col justify-center">
+                <div class="flex flex-col justify-center lg:col-span-2">
 
                     {{-- Badge --}}
                     <div class="hero-badge mb-5 w-fit">
@@ -517,33 +728,28 @@
                 </div>
 
                 {{-- ── Côté carousel ── --}}
-                <div class="flex justify-center md:justify-end">
-                    <div class="relative" style="width:320px;">
+                <div class="flex justify-center lg:justify-end lg:col-span-3">
+                    <div class="relative w-full">
 
                         {{-- Carousel --}}
                         <div class="hero-carousel shadow-2xl rounded-3xl overflow-hidden border border-white/10" id="heroCarousel">
                             @php
-                                $heroImages = $allProducts->filter(fn($p) => !empty($p['image']))->take(6)->values();
-                                if ($heroImages->isEmpty()) {
-                                    $heroImages = collect([['image' => null, 'name' => 'FBK Printing']]);
-                                }
+                                $heroSlides = [
+                                    ['image' => 'assets/img/lit1.jpeg', 'name' => 'Papiers Premium'],
+                                    ['image' => 'assets/img/lit2.jpeg', 'name' => 'Rouleaux Thermiques'],
+                                    ['image' => 'assets/img/lit3.jpeg', 'name' => 'Encres Professionnelles'],
+                                    ['image' => 'assets/img/lit4.jpeg', 'name' => 'Presses Modernes'],
+                                ];
                             @endphp
-                            @foreach($heroImages as $i => $prod)
+                            @foreach($heroSlides as $i => $slide)
                             <div class="hero-slide {{ $i === 0 ? 'active' : '' }}" data-index="{{ $i }}">
-                                @if($prod['image'])
-                                    <img src="{{ $prod['image'] }}" alt="{{ $prod['name'] }}"
-                                         onerror="this.onerror=null;this.parentElement.style.background='linear-gradient(135deg,#f5a962,#d4753c)'">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center"
-                                         style="background:linear-gradient(135deg,#f5a962,#d4753c);">
-                                        <img src="{{ asset('assets/img/fbk.png') }}" alt="FBK" class="w-32 h-32 object-contain opacity-80">
-                                    </div>
-                                @endif
+                                <img src="{{ asset($slide['image']) }}" alt="{{ $slide['name'] }}"
+                                     onerror="this.onerror=null;this.parentElement.style.background='linear-gradient(135deg,#f5a962,#d4753c)';this.style.display='none';">
                                 <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent rounded-3xl"></div>
-                                {{-- Nom produit en bas --}}
+                                {{-- Nom du slide en bas --}}
                                 <div class="absolute bottom-4 left-4 right-4">
                                     <span class="text-white text-sm font-semibold bg-black/30 backdrop-blur px-3 py-1 rounded-full">
-                                        {{ $prod['name'] }}
+                                        {{ $slide['name'] }}
                                     </span>
                                 </div>
                             </div>
@@ -560,7 +766,7 @@
 
                         {{-- Dots --}}
                         <div class="flex justify-center gap-2 mt-4" id="heroDots">
-                            @foreach($heroImages as $i => $prod)
+                            @foreach($heroSlides as $i => $slide)
                             <button class="hero-dot {{ $i === 0 ? 'active' : '' }}" data-dot="{{ $i }}" aria-label="Slide {{ $i+1 }}"></button>
                             @endforeach
                         </div>
@@ -588,6 +794,90 @@
                 </div>
 
             </div>
+        </div>
+    </section>
+
+    {{-- ══════════════════════════════════════════
+         SECTION VIDÉOS
+    ══════════════════════════════════════════ --}}
+    <section id="videos" class="videos-section py-28">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8" style="position:relative;z-index:1;">
+
+            {{-- En-tête --}}
+            <div class="text-center mb-16">
+                <div class="videos-deco-line">
+                    <span></span>
+                    <i class="fas fa-play-circle" style="color:#f5a962;font-size:20px;"></i>
+                    <span></span>
+                </div>
+                <span class="inline-block px-6 py-2 rounded-full text-xs font-bold mb-6 uppercase tracking-widest"
+                      style="background:linear-gradient(135deg,rgba(254,243,199,0.8),rgba(254,209,152,0.8));color:#92400e;border:1.5px solid #fcd34d;backdrop-filter:blur(8px);">
+                    🎬 FBK Printing en action
+                </span>
+                <h2 class="text-5xl md:text-6xl font-extrabold text-gray-800 mb-5 leading-tight">
+                    Nos <span class="gradient-text">Vidéos</span> Professionnelles
+                </h2>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
+                    Explorez notre savoir-faire, nos produits de qualité et nos services de livraison — cliquez sur une vidéo pour découvrir FBK Printing
+                </p>
+            </div>
+
+            {{-- Grille vidéos --}}
+            <div class="video-grid" style="max-width:1150px;margin:0 auto;">
+                @php
+                    $fbkVideos = [
+                        ['src' => 'videos/video1.mp4', 'label' => 'Nos produits'],
+                        ['src' => 'videos/video2.mp4', 'label' => 'Impression pro'],
+                        ['src' => 'videos/video3.mp4', 'label' => 'Notre atelier'],
+                        ['src' => 'videos/video4.mp4', 'label' => 'Livraison Guinée'],
+                    ];
+                @endphp
+                @foreach($fbkVideos as $vi => $vid)
+                <div class="video-item" id="video-item-{{ $vi }}">
+                    <video id="vid-{{ $vi }}"
+                           src="{{ asset($vid['src']) }}"
+                           preload="metadata"
+                           playsinline>
+                    </video>
+
+                    {{-- Badges --}}
+                    <span class="video-label">{{ $vid['label'] }}</span>
+                    <span class="video-num-badge">{{ $vi + 1 }}</span>
+
+                    {{-- Overlay lecture --}}
+                    <div class="video-overlay" onclick="fbkTogglePlay({{ $vi }})">
+                        <button class="video-play-btn" id="play-icon-{{ $vi }}">
+                            <i class="fas fa-play" style="margin-left:3px;"></i>
+                        </button>
+                    </div>
+
+                    {{-- Barre de contrôles --}}
+                    <div class="video-controls-bar">
+                        <button class="vid-ctrl-btn" id="mute-btn-{{ $vi }}"
+                                onclick="fbkToggleMute(event,{{ $vi }})" title="Son">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                        <div class="vid-progress" id="progress-{{ $vi }}">
+                            <div class="vid-progress-fill" id="progress-fill-{{ $vi }}"></div>
+                        </div>
+                        <span class="vid-time" id="time-{{ $vi }}">0:00</span>
+                        <button class="vid-ctrl-btn" onclick="fbkFullscreen(event,{{ $vi }})" title="Plein écran">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+
+            {{-- Bas de section --}}
+            <div class="text-center mt-12">
+                <p class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-medium"
+                   style="background:rgba(245,169,98,0.08);color:#d97706;border:1.5px solid rgba(245,169,98,0.25);">
+                    <i class="fas fa-info-circle text-lg"></i>
+                    <span>Cliquez pour lancer · Une vidéo à la fois</span>
+                </p>
+            </div>
+
         </div>
     </section>
 
@@ -826,6 +1116,28 @@
 
             {{-- ─── Panel : Promotions ─── --}}
             <div id="panel-promo" class="panel">
+
+                {{-- Bannière événement saisonnier --}}
+                @if(!empty($seasonalEvent))
+                <div class="mb-6 flex flex-wrap items-center gap-4 rounded-2xl px-5 py-4 border"
+                     style="background:{{ $seasonalEvent['bg'] }};border-color:{{ $seasonalEvent['border'] }};">
+                    <span class="text-3xl">{{ $seasonalEvent['icon'] }}</span>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-bold text-sm" style="color:{{ $seasonalEvent['color'] }}">
+                            Offre spéciale · {{ $seasonalEvent['name'] }}
+                        </p>
+                        <p class="text-xs text-gray-600 mt-0.5">
+                            Profitez de −{{ $seasonalEvent['discount_min'] }}% à −{{ $seasonalEvent['discount_max'] }}% sur nos produits jusqu'au
+                            <strong>{{ \Carbon\Carbon::parse($seasonalEvent['end_date'])->translatedFormat('d F Y') }}</strong>
+                        </p>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <div class="text-xs text-gray-500 mb-1">Fin dans</div>
+                        <div id="seasonal-countdown" class="font-bold text-base tabular-nums" style="color:{{ $seasonalEvent['color'] }}">—</div>
+                    </div>
+                </div>
+                @endif
+
                 <div class="products-layout">
 
                     {{-- Sidebar --}}
@@ -1208,8 +1520,9 @@
         {{-- Données injectées depuis le contrôleur --}}
         {{-- Chaque produit doit avoir : name, category_name, price, old_price (nullable),
              discount (nullable, ex: 25), rating, image (nullable), is_best, is_promo --}}
-        const bestProducts  = @json($bestProducts ?? []);
-        const promoProducts = @json($promoProducts ?? []);
+        const bestProducts   = @json($bestProducts ?? []);
+        const promoProducts  = @json($promoProducts ?? []);
+        const seasonalEndAt  = @json($seasonalEvent['end_date'] ?? null);
 
         /* ── Rendu d'une carte produit ── */
         function renderCard(p) {
@@ -1222,8 +1535,14 @@
                 : '';
             
             const imgHTML = p.image
-                ? `<img src="${p.image}" alt="Image non trouvée: ${p.image}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='https://placehold.co/400x400?text=Introuvable'">`
+                ? `<img class="lazy" data-src="${p.image}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23f0f0f0' width='400' height='400'/%3E%3C/svg%3E" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='https://placehold.co/400x400?text=Introuvable'">`
                 : `<span class="no-img">🖨️</span>`;
+            const countdownHTML = p.promo_ends_at
+                ? `<div class="promo-countdown" data-ends="${p.promo_ends_at}">
+                       <i class="fas fa-clock" style="font-size:10px;"></i> <span class="countdown-label">—</span>
+                   </div>`
+                : '';
+
             return `<div class="prod-card" style="cursor:pointer;" onclick="window.location='/product/${p.id}'">
                 <div class="prod-img">
                     <span class="prod-badge ${badgeCls}">${badgeTxt}</span>
@@ -1237,6 +1556,7 @@
                         <span class="prod-price">${Number(p.price).toLocaleString('fr-FR')} GNF</span>
                         ${oldHTML}
                     </div>
+                    ${countdownHTML}
                     <div class="prod-btns">
                         <button class="prod-btn" onclick="event.stopPropagation();addToCart(${p.id})">
                             <i class="fas fa-shopping-bag mr-1"></i> Panier
@@ -1289,6 +1609,9 @@
                    </div>`;
             document.getElementById(`count-${tab}`).textContent =
                 `${data.length} produit${data.length !== 1 ? 's' : ''}`;
+            
+            // Réinitialiser le lazy loading après mise à jour des images
+            initLazyLoading();
         }
 
         function resetFilters(tab) {
@@ -1431,9 +1754,63 @@
             });
         }
 
+        /* ── Lazy Loading Images ── */
+        function initLazyLoading() {
+            const images = document.querySelectorAll('img.lazy');
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries, obs) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            img.src = img.dataset.src;
+                            img.classList.add('loaded');
+                            img.classList.remove('lazy');
+                            obs.unobserve(img);
+                        }
+                    });
+                }, { rootMargin: '50px' });
+                images.forEach(img => observer.observe(img));
+            } else {
+                // Fallback pour les navigateurs sans support IntersectionObserver
+                images.forEach(img => {
+                    img.src = img.dataset.src;
+                    img.classList.add('loaded');
+                });
+            }
+        }
+
+        /* ── Compte à rebours produits promo ── */
+        function formatCountdown(ms) {
+            if (ms <= 0) return 'Expiré';
+            const s = Math.floor(ms / 1000);
+            const d = Math.floor(s / 86400);
+            const h = Math.floor((s % 86400) / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            if (d > 0) return `${d}j ${h}h`;
+            if (h > 0) return `${h}h ${m}min`;
+            return `${m}min`;
+        }
+
+        function tickCountdowns() {
+            const now = Date.now();
+            document.querySelectorAll('.promo-countdown[data-ends]').forEach(el => {
+                const diff = new Date(el.dataset.ends).getTime() - now;
+                el.querySelector('.countdown-label').textContent = formatCountdown(diff);
+            });
+            // Bannière saisonnière
+            const sc = document.getElementById('seasonal-countdown');
+            if (sc && seasonalEndAt) {
+                sc.textContent = formatCountdown(new Date(seasonalEndAt).getTime() - now);
+            }
+        }
+
+        setInterval(tickCountdowns, 1000);
+        tickCountdowns();
+
         /* ── Init ── */
         filterProducts('best');
         filterProducts('promo');
+        initLazyLoading();
 
         /* ── Smooth scroll ── */
         document.querySelectorAll('a[href^="#"]').forEach(a => {
@@ -1448,6 +1825,147 @@
         document.getElementById('mobileMenuBtn').addEventListener('click', () => {
             // menu mobile à implémenter
         });
+
+        /* ── Video Gallery ── */
+        (function() {
+            const VID_COUNT = 4;
+
+            function fmt(s) {
+                if (!isFinite(s)) return '0:00';
+                const m = Math.floor(s / 60);
+                return m + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+            }
+
+            function getElements(i) {
+                return {
+                    vid:  document.getElementById('vid-'           + i),
+                    item: document.getElementById('video-item-'    + i),
+                    icon: document.getElementById('play-icon-'     + i),
+                    bar:  document.getElementById('progress-'      + i),
+                    fill: document.getElementById('progress-fill-' + i),
+                    time: document.getElementById('time-'          + i),
+                    mute: document.getElementById('mute-btn-'      + i),
+                };
+            }
+
+            /* Avancer à une position à partir d'un clientX */
+            function seekTo(i, clientX) {
+                const { vid, bar, fill, time } = getElements(i);
+                if (!vid || !bar) return;
+                const rect = bar.getBoundingClientRect();
+                const pct  = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+                if (isFinite(vid.duration) && vid.duration > 0) {
+                    vid.currentTime = pct * vid.duration;
+                }
+                if (fill) fill.style.width = (pct * 100) + '%';
+                if (time) time.textContent = fmt(vid ? vid.currentTime : 0);
+            }
+
+            /* Écoutes timeupdate + ended */
+            for (let i = 0; i < VID_COUNT; i++) {
+                (function(idx) {
+                    const { vid } = getElements(idx);
+                    if (!vid) return;
+                    vid.addEventListener('timeupdate', function() {
+                        const dur = vid.duration;
+                        if (!isFinite(dur) || dur === 0) return;
+                        const pct = (vid.currentTime / dur) * 100;
+                        const fill = document.getElementById('progress-fill-' + idx);
+                        const time = document.getElementById('time-' + idx);
+                        if (fill) fill.style.width = pct + '%';
+                        if (time) time.textContent = fmt(vid.currentTime);
+                    });
+                    vid.addEventListener('ended', function() {
+                        const item = document.getElementById('video-item-' + idx);
+                        const icon = document.getElementById('play-icon-'  + idx);
+                        if (item) item.classList.remove('playing');
+                        if (icon) icon.innerHTML = '<i class="fas fa-play" style="margin-left:3px;"></i>';
+                    });
+                })(i);
+            }
+
+            /* Play / Pause */
+            window.fbkTogglePlay = function(i) {
+                const { vid, item, icon } = getElements(i);
+                if (!vid) return;
+                if (vid.paused) {
+                    for (let j = 0; j < VID_COUNT; j++) {
+                        if (j === i) continue;
+                        const o = document.getElementById('vid-' + j);
+                        if (o && !o.paused) {
+                            o.pause();
+                            document.getElementById('video-item-' + j)?.classList.remove('playing');
+                            const oi = document.getElementById('play-icon-' + j);
+                            if (oi) oi.innerHTML = '<i class="fas fa-play" style="margin-left:3px;"></i>';
+                        }
+                    }
+                    vid.play();
+                    item?.classList.add('playing');
+                    if (icon) icon.innerHTML = '<i class="fas fa-pause"></i>';
+                } else {
+                    vid.pause();
+                    item?.classList.remove('playing');
+                    if (icon) icon.innerHTML = '<i class="fas fa-play" style="margin-left:3px;"></i>';
+                }
+            };
+
+            /* Mute */
+            window.fbkToggleMute = function(e, i) {
+                e.stopPropagation();
+                const { vid, mute } = getElements(i);
+                if (!vid) return;
+                vid.muted = !vid.muted;
+                if (mute) mute.innerHTML = vid.muted
+                    ? '<i class="fas fa-volume-mute"></i>'
+                    : '<i class="fas fa-volume-up"></i>';
+            };
+
+            /* Plein écran */
+            window.fbkFullscreen = function(e, i) {
+                e.stopPropagation();
+                const { item } = getElements(i);
+                if (!item) return;
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    (item.requestFullscreen || item.webkitRequestFullscreen || function(){}).call(item);
+                }
+            };
+
+            /* Seek : clic + drag sur la barre */
+            for (let i = 0; i < VID_COUNT; i++) {
+                (function(idx) {
+                    const bar = document.getElementById('progress-' + idx);
+                    if (!bar) return;
+
+                    bar.addEventListener('mousedown', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        seekTo(idx, e.clientX);
+
+                        function onMove(ev) { seekTo(idx, ev.clientX); }
+                        function onUp()   {
+                            document.removeEventListener('mousemove', onMove);
+                            document.removeEventListener('mouseup',   onUp);
+                        }
+                        document.addEventListener('mousemove', onMove);
+                        document.addEventListener('mouseup',   onUp);
+                    });
+
+                    bar.addEventListener('touchstart', function(e) {
+                        e.stopPropagation();
+                        seekTo(idx, e.touches[0].clientX);
+                        function onMove(ev) { seekTo(idx, ev.touches[0].clientX); }
+                        function onEnd()    {
+                            bar.removeEventListener('touchmove', onMove);
+                            bar.removeEventListener('touchend',  onEnd);
+                        }
+                        bar.addEventListener('touchmove', onMove, { passive: true });
+                        bar.addEventListener('touchend',  onEnd);
+                    }, { passive: true });
+                })(i);
+            }
+        })();
 
         /* ── Hero Carousel ── */
         (function() {

@@ -41,8 +41,31 @@ class CartController extends Controller
 
     public function show()
     {
+        $cart              = session()->get('cart', []);
+        $discountRate      = \App\Services\OrderService::DISCOUNT_RATE;
+        $discountThreshold = \App\Services\OrderService::DISCOUNT_THRESHOLD;
+        return view('ecommerce.cart', compact('cart', 'discountRate', 'discountThreshold'));
+    }
+
+    public function update(Request $request, $id)
+    {
         $cart = session()->get('cart', []);
-        return view('ecommerce.cart', compact('cart'));
+
+        if (!isset($cart[$id])) {
+            return redirect()->route('panier');
+        }
+
+        if ($request->action === 'increase') {
+            $cart[$id]['quantity']++;
+        } elseif ($request->action === 'decrease') {
+            $cart[$id]['quantity']--;
+            if ($cart[$id]['quantity'] <= 0) {
+                unset($cart[$id]);
+            }
+        }
+
+        session()->put('cart', $cart);
+        return redirect()->route('panier');
     }
 
     public function remove($id)

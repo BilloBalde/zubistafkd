@@ -10,6 +10,21 @@ class Product extends Model
     use HasFactory;
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'promo_ends_at' => 'datetime',
+        'is_promo'      => 'boolean',
+        'is_best'       => 'boolean',
+    ];
+
+    public function scopeActivePromo($query)
+    {
+        return $query->whereNotNull('promo_price')
+            ->where(function ($q) {
+                $q->whereNull('promo_ends_at')
+                  ->orWhere('promo_ends_at', '>', now());
+            });
+    }
+
     public function categories()
     {
         return $this->belongsToMany(Category::class, 'category_products');

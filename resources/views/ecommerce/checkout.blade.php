@@ -99,24 +99,61 @@
                                 foreach($cartItems as $item) {
                                     if($item['product_id'] == $product->id) $qty = $item['quantity'];
                                 }
+                                $unitPrice = $product->promo_price ?? $product->price;
+                                $hasPromo  = !is_null($product->promo_price);
                             @endphp
                             <li class="py-3 flex justify-between gap-2 text-sm">
                                 <div>
                                     <span class="font-medium text-gray-900">{{ $product->libelle }}</span>
                                     <span class="block text-xs text-gray-500">Qté {{ $qty }}</span>
+                                    @if($hasPromo)
+                                        <span class="inline-block text-xs text-green-600 font-semibold mt-0.5">
+                                            <s class="text-gray-400 font-normal">{{ number_format($product->price, 0, ',', ' ') }}</s>
+                                            &nbsp;Promo
+                                        </span>
+                                    @endif
                                 </div>
-                                <span class="text-gray-800 whitespace-nowrap">{{ number_format($product->price * $qty, 0, ',', ' ') }} GNF</span>
+                                <span class="{{ $hasPromo ? 'text-green-600 font-semibold' : 'text-gray-800' }} whitespace-nowrap">
+                                    {{ number_format($unitPrice * $qty, 0, ',', ' ') }} GNF
+                                </span>
                                 <input type="hidden" name="items[{{ $loop->index }}][product_id]" value="{{ $product->id }}">
                                 <input type="hidden" name="items[{{ $loop->index }}][quantity]" value="{{ $qty }}">
                             </li>
                         @endforeach
                     </ul>
                     <div class="border-t border-gray-200 pt-4 space-y-2">
+
+                        {{-- Bannière réduction si éligible --}}
+                        @if($discount > 0)
+                        <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2 mb-3">
+                            <i class="fas fa-tag text-green-500 text-sm"></i>
+                            <span class="text-xs font-semibold text-green-700">
+                                Réduction {{ (int)($discountRate * 100) }}% appliquée ! ({{ $totalQty }} produits achetés)
+                            </span>
+                        </div>
+                        @elseif($totalQty > 0)
+                        <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">
+                            <i class="fas fa-info-circle text-amber-500 text-sm"></i>
+                            <span class="text-xs text-amber-700">
+                                Ajoutez {{ $discountThreshold - $totalQty }} produit(s) de plus pour obtenir
+                                <strong>-{{ (int)($discountRate * 100) }}%</strong> sur votre commande
+                            </span>
+                        </div>
+                        @endif
+
                         <div class="flex justify-between text-sm text-gray-600">
                             <span>Sous-total</span>
-                            <span>{{ number_format($total, 0, ',', ' ') }} GNF</span>
+                            <span>{{ number_format($subtotal, 0, ',', ' ') }} GNF</span>
                         </div>
-                        <div class="flex justify-between text-lg font-bold text-gray-900 pt-2">
+
+                        @if($discount > 0)
+                        <div class="flex justify-between text-sm font-medium text-green-600">
+                            <span><i class="fas fa-tag mr-1"></i>Réduction {{ (int)($discountRate * 100) }}% (≥ {{ $discountThreshold }} produits)</span>
+                            <span>− {{ number_format($discount, 0, ',', ' ') }} GNF</span>
+                        </div>
+                        @endif
+
+                        <div class="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t border-gray-100">
                             <span>Total</span>
                             <span class="text-amber-600">{{ number_format($total, 0, ',', ' ') }} GNF</span>
                         </div>

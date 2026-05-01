@@ -119,10 +119,10 @@ public function store(Request $request)
 {
     $salesData = $request->input('sales');
     $rules = [
-        'sales.*.numeroFacture' => 'required|string',
+        'store_id'           => 'required|exists:stores,id',
         'sales.*.product_id' => 'required|exists:products,id',
-        'sales.*.prix' => 'required|numeric|min:0',
-        'sales.*.quantity' => 'required|integer|min:1',
+        'sales.*.prix'       => 'required|numeric|min:0',
+        'sales.*.quantity'   => 'required|integer|min:1',
     ];
 
     //$validator = Validator::make($salesData, $rules);
@@ -251,9 +251,10 @@ public function store(Request $request)
         return view('sales.edit', compact('sale'));
     }
 
-    public function pos(){
+    public function pos()
+    {
         $categories = Category::all();
-        $produits = Product::all();
+        $produits = Product::with(['categories', 'stores'])->get();
         $userStoreId = Auth::user()->role_id == 3
             ? Store::where('user_id', Auth::user()->id)->value('id')
             : null;
@@ -261,7 +262,39 @@ public function store(Request $request)
         $customers = Customer::all();
         $countFactures = Facture::count() + 1;
         $numeroFacture = date('Ym').''.sprintf("%04d", $countFactures);
-        return view('sales.pos', compact('produits', 'boutiques', 'customers', 'categories', 'userStoreId', 'numeroFacture'));
+
+        // Regroupement des catégories par category_type
+        $groupedCategories = $categories->groupBy('category_type');
+
+        $categoryGroups = [];
+        foreach ($groupedCategories as $categoryType => $cats) {
+            $catIds = $cats->pluck('id');
+            $groupProducts = $produits->filter(function ($product) use ($catIds) {
+                return $product->categories->pluck('id')->intersect($catIds)->isNotEmpty();
+            });
+
+            // Utiliser l'image de la catégorie si disponible, sinon celle du premier produit
+            $firstCat = $cats->first();
+            if ($firstCat && $firstCat->image) {
+                $catImage = asset('cat-images/' . $firstCat->image);
+            } elseif ($groupProducts->first()) {
+                $catImage = asset('products/' . $groupProducts->first()->image);
+            } else {
+                $catImage = asset('assets/img/default-cat.png');
+            }
+
+            $baseSlug = \Illuminate\Support\Str::slug($categoryType);
+
+            $categoryGroups[] = (object)[
+                'base_slug'  => $baseSlug,
+                'name'       => $categoryType,
+                'image'      => $catImage,
+                'categories' => $cats,
+                'products'   => $groupProducts,
+            ];
+        }
+
+        return view('sales.pos', compact('produits', 'boutiques', 'customers', 'categories', 'categoryGroups', 'userStoreId', 'numeroFacture'));
     }
 
     /**
