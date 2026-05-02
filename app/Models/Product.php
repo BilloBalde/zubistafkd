@@ -35,10 +35,17 @@ class Product extends Model
         return $this->belongsToMany(Store::class, 'store_products')->withPivot('quantity');
     }
 
-    // app/Models/Product.php
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function getEffectivePriceAttribute(): float
+    {
+        if ($this->promo_price && (!$this->promo_ends_at || $this->promo_ends_at->isFuture())) {
+            return (float) $this->promo_price;
+        }
+        return (float) $this->price;
     }
 
 }

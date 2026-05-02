@@ -12,6 +12,7 @@ use App\Http\Controllers\CurrencySettingController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\Ecommerce\AddressController;
 use App\Http\Controllers\Ecommerce\AuthOtpController;
+use App\Http\Controllers\Api\PriceController;
 use App\Http\Controllers\Ecommerce\CartController;
 use App\Http\Controllers\Ecommerce\OrderController;
 use App\Http\Controllers\Ecommerce\OrangeMoneyController;
@@ -100,10 +101,11 @@ Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
 Route::get('/emailSetting', [EmailController::class, 'index'])->name('emailSetting');
 
 
+Route::get('/calculate-price', [PriceController::class, 'calculate'])->name('calculate.price');
 Route::get('/panier', [CartController::class, 'show'])->name('panier');
 Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
-Route::get('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 
 Route::prefix('shop')->group(function () {
     Route::get('/register', [AuthOtpController::class, 'showRegister'])->name('otp.register');
@@ -121,6 +123,7 @@ Route::prefix('shop')->group(function () {
         Route::post('/addresses', [AddressController::class, 'store'])->name('addresses.store');
         Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])->name('addresses.destroy');
         Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout');
+        Route::get('/checkout/cancel', [OrderController::class, 'cancelCheckout'])->name('checkout.cancel');
         Route::get('/buy-now/{id}', [OrderController::class, 'buyNow'])->name('buy.now');
         Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
@@ -249,6 +252,7 @@ Route::post('/newsletter', function (\Illuminate\Http\Request $request) {
 Route::get('/catalogue', [VisitController::class, 'indexProducts'])->name('products.index');
 Route::get('/nos-categories', [VisitController::class, 'publicCategories'])->name('public.categories');
 Route::post('/produits/load-more', [VisitController::class, 'loadMoreProducts'])->name('products.loadMore');
+Route::get('/search', [VisitController::class, 'search'])->name('search');
 
 
 

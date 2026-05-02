@@ -33,11 +33,11 @@ class AuthOtpController extends Controller
 
     public function showLogin(Request $request)
     {
-        if ($request->query('redirect')) {
-            session(['auth_redirect' => $request->query('redirect')]);
-        }
         if ($request->query('product_id')) {
-            session(['buy_now_product_id' => $request->query('product_id')]);
+            session([
+                'buy_now_product_id' => (int) $request->query('product_id'),
+                'buy_now_qty'        => max(1, (int) $request->query('qty', 1)),
+            ]);
         }
         return view('ecommerce.auth.login');
     }
@@ -80,16 +80,13 @@ class AuthOtpController extends Controller
             $user = $this->authService->login($request->phone);
             Auth::login($user);
 
-            $redirect = session()->pull('auth_redirect');
             $buyNowProductId = session()->pull('buy_now_product_id');
+            $buyNowQty       = session()->pull('buy_now_qty', 1);
 
-            // Si l'utilisateur venait de cliquer "Commander", rediriger vers checkout
             if ($buyNowProductId) {
-                return redirect()->route('checkout')->with('success', 'Bienvenue ! Veuillez confirmer votre commande.');
-            }
-
-            if ($redirect === 'checkout') {
-                return redirect()->route('checkout')->with('success', 'Bienvenue !');
+                $url = route('buy.now', $buyNowProductId) . '?qty=' . $buyNowQty;
+                return redirect()->to($url)
+                    ->with('success', 'Bienvenue ! Veuillez confirmer votre commande.');
             }
 
             return redirect()->route('shop.home')->with('success', 'Bienvenue !');

@@ -6,26 +6,29 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use App\Services\DiscountService;
 
 class OrderService
 {
-    const DISCOUNT_THRESHOLD = 4;
-    const DISCOUNT_RATE      = 0.40;
-
     public function createOrder($userId, $addressId, array $items, $paymentMethod)
     {
         return DB::transaction(function () use ($userId, $addressId, $items, $paymentMethod) {
+            $discountService = app(DiscountService::class);
             $subtotal  = 0;
-            $totalQty  = 0;
+            $discount  = 0;
+
+            $productIds = array_column($items, 'product_id');
+            $products   = Product::whereIn('id', $productIds)->get()->keyBy('id');
 
             foreach ($items as $item) {
-                $product   = Product::findOrFail($item['product_id']);
-                $unitPrice = $product->promo_price ?? $product->price;
-                $subtotal  += $unitPrice * $item['quantity'];
-                $totalQty  += $item['quantity'];
+                $product   = $products[$item['product_id']];
+                $unitPrice = $product->effective_price;
+                $qty       = (int) $item['quantity'];
+                $result    = $discountService->calculateItem($qty, $unitPrice);
+                $subtotal += $unitPrice * $qty;
+                $discount += $result['discount_amount'];
             }
 
-            $discount    = $totalQty >= self::DISCOUNT_THRESHOLD ? (int)($subtotal * self::DISCOUNT_RATE) : 0;
             $totalAmount = max(0, $subtotal - $discount);
 
             $order = Order::create([
@@ -40,12 +43,12 @@ class OrderService
             ]);
 
             foreach ($items as $item) {
-                $product = Product::find($item['product_id']);
+                $product = $products[$item['product_id']];
                 OrderItem::create([
                     'order_id'   => $order->id,
                     'product_id' => $item['product_id'],
                     'quantity'   => $item['quantity'],
-                    'price'      => $product->promo_price ?? $product->price,
+                    'price'      => $product->effective_price,
                 ]);
             }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Ecommerce;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Services\DiscountService;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -11,19 +12,18 @@ class CartController extends Controller
     public function add(Request $request, $id)
     {
         $product = Product::findOrFail($id);
-        $cart = session()->get('cart', []);
+        $qty     = max(1, (int) $request->input('quantity', 1));
+        $cart    = session()->get('cart', []);
 
-        // Si le produit est déjà dans le panier, on augmente la quantité
-        if(isset($cart[$id])) {
-            $cart[$id]['quantity']++;
+        if (isset($cart[$id])) {
+            $cart[$id]['quantity'] += $qty;
         } else {
-            // Sinon on l'ajoute
             $cart[$id] = [
                 "product_id" => $product->id,
-                "name" => $product->libelle,
-                "quantity" => 1,
-                "price" => $product->promo_price ?? $product->price,
-                "image" => $product->image
+                "name"       => $product->libelle,
+                "quantity"   => $qty,
+                "price"      => $product->effective_price,
+                "image"      => $product->image,
             ];
         }
 
@@ -41,10 +41,31 @@ class CartController extends Controller
 
     public function show()
     {
-        $cart              = session()->get('cart', []);
-        $discountRate      = \App\Services\OrderService::DISCOUNT_RATE;
-        $discountThreshold = \App\Services\OrderService::DISCOUNT_THRESHOLD;
-        return view('ecommerce.cart', compact('cart', 'discountRate', 'discountThreshold'));
+        $cart            = session()->get('cart', []);
+        $discountService = app(DiscountService::class);
+
+        $subtotal      = 0;
+        $totalDiscount = 0;
+        $discountLines = [];
+
+        foreach ($cart as $item) {
+            $result         = $discountService->calculateItem((int) $item['quantity'], (float) $item['price']);
+            $subtotal      += (float) $item['price'] * (int) $item['quantity'];
+            $totalDiscount += $result['discount_amount'];
+
+            if ($result['discount_percent'] > 0) {
+                $discountLines[] = [
+                    'name'    => $item['name'],
+                    'qty'     => $result['quantity'],
+                    'percent' => $result['discount_percent'],
+                    'amount'  => $result['discount_amount'],
+                ];
+            }
+        }
+
+        $finalTotal = max(0, $subtotal - $totalDiscount);
+
+        return view('ecommerce.cart', compact('cart', 'subtotal', 'totalDiscount', 'finalTotal', 'discountLines'));
     }
 
     public function update(Request $request, $id)

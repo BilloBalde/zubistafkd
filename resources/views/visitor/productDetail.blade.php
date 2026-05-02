@@ -10,11 +10,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * { font-family: 'Poppins', sans-serif; }
-        .navbar-fixed {
+        .navbar-transparent {
             position: fixed; top: 0; width: 100%; z-index: 50;
-            background: rgba(255,255,255,0.97);
+            background: rgba(255,255,255,0.95);
             backdrop-filter: blur(10px);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         .prod-img-main {
             width: 100%; height: 380px;
@@ -93,48 +93,76 @@
 </head>
 <body class="bg-gray-50">
 
-{{-- NAVBAR --}}
-<nav class="navbar-fixed">
+{{-- NAVBAR (identique au homepage) --}}
+<nav class="navbar-transparent">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
-            <a href="{{ route('accueil') }}" class="flex items-center space-x-2">
+            <div class="flex items-center space-x-2">
                 <img src="{{ asset('assets/img/fbk.png') }}" alt="FBK-Printing" class="h-10 w-auto object-contain">
                 <span class="text-xl font-bold text-gray-800 hidden sm:inline">FBK-Printing</span>
-            </a>
+            </div>
             <div class="hidden md:flex space-x-8">
                 <a href="{{ route('accueil') }}" class="text-gray-700 font-medium hover:text-amber-600 transition">Accueil</a>
-                <a href="{{ route('products.index') }}" class="text-gray-700 font-medium hover:text-amber-600 transition">Catalogue</a>
-                <a href="{{ route('public.categories') }}" class="text-gray-700 font-medium hover:text-amber-600 transition">Catégories</a>
+                <a href="{{ route('accueil') }}#produits" class="text-gray-700 font-medium hover:text-amber-600 transition">Produits</a>
+                <a href="{{ route('accueil') }}#pourquoi" class="text-gray-700 font-medium hover:text-amber-600 transition">Pourquoi nous</a>
+                <a href="{{ route('accueil') }}#apropos" class="text-gray-700 font-medium hover:text-amber-600 transition">À Propos</a>
+                <a href="{{ route('accueil') }}#contact" class="text-gray-700 font-medium hover:text-amber-600 transition">Contact</a>
             </div>
             <div class="flex items-center space-x-4">
                 @auth
                     @if(Auth::user()->isCustomer())
-                        <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-amber-600 transition text-sm">
+                        <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-amber-600 transition font-medium text-sm">
                             <i class="fas fa-receipt text-xl"></i>
+                            <span class="hidden sm:inline"> Mes commandes</span>
                         </a>
                         <form method="POST" action="{{ route('shop.logout') }}" class="inline">
                             @csrf
-                            <button type="submit" class="text-gray-700 hover:text-amber-600 transition text-sm">
+                            <button type="submit" class="text-gray-700 hover:text-amber-600 transition font-medium text-sm">
                                 <i class="fas fa-sign-out-alt text-xl"></i>
+                                <span class="hidden sm:inline"> Déconnexion</span>
                             </button>
                         </form>
                     @else
-                        <a href="{{ route('home') }}" class="text-gray-700 hover:text-amber-600 transition text-sm">
+                        <a href="{{ route('home') }}" class="text-gray-700 hover:text-amber-600 transition font-medium">
                             <i class="fas fa-tachometer-alt text-xl"></i>
+                            <span class="hidden sm:inline"> Espace gestion</span>
+                        </a>
+                        <a href="{{ url('/logout') }}" class="text-gray-700 hover:text-amber-600 transition font-medium text-sm">
+                            <i class="fas fa-sign-out-alt text-xl"></i>
+                            <span class="hidden sm:inline"> Déconnexion</span>
                         </a>
                     @endif
                 @else
-                    <a href="{{ route('otp.login') }}" class="text-gray-700 hover:text-amber-600 transition text-sm">
+                    <a href="{{ route('otp.login') }}" class="text-gray-700 hover:text-amber-600 transition font-medium">
                         <i class="fas fa-sign-in-alt text-xl"></i>
-                        <span class="hidden sm:inline ml-1">Connexion</span>
+                        <span class="hidden sm:inline"> Se connecter</span>
                     </a>
+                    <a href="{{ route('login') }}" class="text-gray-500 hover:text-amber-600 transition text-xs hidden lg:inline" title="Connexion équipe">Pro</a>
                 @endauth
+
+                {{-- Panier --}}
                 <a href="{{ route('panier') }}" class="relative p-2 text-gray-700 hover:text-amber-600 transition">
                     <i class="fas fa-shopping-bag text-xl"></i>
                     <span id="cart-count" class="absolute top-0 right-0 bg-amber-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                         {{ count(session('cart', [])) }}
                     </span>
                 </a>
+
+                {{-- Menu mobile --}}
+                <button class="md:hidden p-2 text-gray-700" id="mobileMenuBtn">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        {{-- Menu mobile déroulant --}}
+        <div id="mobileMenu" class="md:hidden hidden pb-4 border-t border-gray-100 mt-2">
+            <div class="flex flex-col space-y-1 pt-3">
+                <a href="{{ route('accueil') }}" class="px-4 py-2 text-gray-700 font-medium hover:text-amber-600 hover:bg-amber-50 rounded-lg transition">Accueil</a>
+                <a href="{{ route('accueil') }}#produits" class="px-4 py-2 text-gray-700 font-medium hover:text-amber-600 hover:bg-amber-50 rounded-lg transition">Produits</a>
+                <a href="{{ route('accueil') }}#pourquoi" class="px-4 py-2 text-gray-700 font-medium hover:text-amber-600 hover:bg-amber-50 rounded-lg transition">Pourquoi nous</a>
+                <a href="{{ route('accueil') }}#apropos" class="px-4 py-2 text-gray-700 font-medium hover:text-amber-600 hover:bg-amber-50 rounded-lg transition">À Propos</a>
+                <a href="{{ route('accueil') }}#contact" class="px-4 py-2 text-gray-700 font-medium hover:text-amber-600 hover:bg-amber-50 rounded-lg transition">Contact</a>
             </div>
         </div>
     </div>
@@ -224,13 +252,68 @@
 
                 {{-- Prix + Bouton --}}
                 <div>
-                    <div class="flex items-baseline gap-3 mb-6">
+                    <div class="flex items-baseline gap-3 mb-5">
                         <span class="price-main">{{ number_format($product->promo_price ?? $product->price, 0, ',', ' ') }} GNF</span>
                         @if($product->promo_price)
                             <span class="price-old">{{ number_format($product->price, 0, ',', ' ') }} GNF</span>
                             @php $disc = round((1 - $product->promo_price / $product->price) * 100); @endphp
                             <span class="text-xs font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">-{{ $disc }}%</span>
                         @endif
+                    </div>
+
+                    {{-- Tarifs de gros --}}
+                    @php
+                        $basePrice = ($product->promo_price && (!$product->promo_ends_at || $product->promo_ends_at->isFuture()))
+                            ? (float) $product->promo_price
+                            : (float) $product->price;
+                        $bulkTiers = [
+                            ['qty' => '5+',  'discount' => 3],
+                            ['qty' => '10+', 'discount' => 5],
+                            ['qty' => '15+', 'discount' => 7],
+                            ['qty' => '20+', 'discount' => 10],
+                        ];
+                    @endphp
+                    <div class="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                        <p class="text-xs font-semibold text-amber-800 mb-2.5 flex items-center gap-1.5">
+                            <i class="fas fa-tags text-amber-500"></i>
+                            Tarifs de gros — prix unitaire selon la quantité
+                        </p>
+                        <div class="grid grid-cols-4 gap-1.5">
+                            @foreach($bulkTiers as $tier)
+                            @php $tierPrice = (int) round($basePrice * (1 - $tier['discount'] / 100)); @endphp
+                            <div class="flex flex-col items-center bg-white rounded-lg border border-amber-100 py-2 px-1 shadow-sm">
+                                <span class="text-[11px] font-bold text-amber-700">{{ $tier['qty'] }} pcs</span>
+                                <span class="text-[12px] font-bold text-gray-800 mt-0.5 leading-tight">
+                                    {{ number_format($tierPrice, 0, ',', ' ') }}
+                                </span>
+                                <span class="text-[10px] text-white font-semibold bg-green-500 rounded-full px-1.5 mt-1">
+                                    −{{ $tier['discount'] }}%
+                                </span>
+                            </div>
+                            @endforeach
+                        </div>
+                        <p class="text-[10px] text-amber-600 mt-2 flex items-center gap-1">
+                            <i class="fas fa-info-circle"></i>
+                            La réduction est appliquée automatiquement dans votre panier
+                        </p>
+                    </div>
+
+                    {{-- Sélecteur de quantité --}}
+                    <div class="flex items-center gap-4 mb-4">
+                        <span class="text-sm font-medium text-gray-600">Quantité :</span>
+                        <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                            <button type="button" onclick="changeQty(-1)"
+                                class="w-10 h-10 flex items-center justify-center text-gray-500 hover:bg-gray-100 active:bg-gray-200 transition font-bold text-lg select-none">
+                                −
+                            </button>
+                            <input type="number" id="qty-input" value="1" min="1" max="9999"
+                                class="w-14 h-10 text-center text-base font-semibold text-gray-800 border-x border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none">
+                            <button type="button" onclick="changeQty(1)"
+                                class="w-10 h-10 flex items-center justify-center text-amber-600 hover:bg-amber-50 active:bg-amber-100 transition font-bold text-lg select-none">
+                                +
+                            </button>
+                        </div>
+                        <span id="qty-discount-badge" class="hidden text-xs font-bold text-white bg-green-500 px-2.5 py-1 rounded-full transition-all"></span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
@@ -254,27 +337,34 @@
     </div>
 
     {{-- PRODUITS SIMILAIRES --}}
-    @if($related->count() > 0)
-    <div>
+    @if(isset($suggested) && $suggested->count() > 0)
+    <div class="mt-14">
         <h2 class="text-xl font-bold text-gray-800 mb-5">
-            <i class="fas fa-layer-group text-amber-500 mr-2"></i>
-            Produits similaires
+            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+            Vous pourriez aussi aimer
         </h2>
+    
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            @foreach($related as $r)
-            <a href="{{ route('productDetail', $r->id) }}" class="rel-card">
-                @if($r->image)
-                    <img src="{{ asset('products/' . $r->image) }}" alt="{{ $r->libelle }}"
+            @foreach($suggested as $s)
+            <a href="{{ route('productDetail', $s->id) }}" class="rel-card">
+    
+                @if($s->image)
+                    <img src="{{ asset('products/' . $s->image) }}"
                          class="rel-img"
                          onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'">
                     <div class="rel-placeholder" style="display:none;">🖨️</div>
                 @else
                     <div class="rel-placeholder">🖨️</div>
                 @endif
+    
                 <div class="rel-info">
-                    <div class="rel-name">{{ $r->libelle }}</div>
-                    <div class="rel-price">{{ number_format($r->promo_price ?? $r->price, 0, ',', ' ') }} GNF</div>
+                    <div class="rel-name">{{ $s->libelle }}</div>
+    
+                    <div class="rel-price">
+                        {{ number_format($s->promo_price ?? $s->price, 0, ',', ' ') }} GNF
+                    </div>
                 </div>
+    
             </a>
             @endforeach
         </div>
@@ -283,12 +373,7 @@
 
 </div>
 
-{{-- FOOTER --}}
-<footer class="bg-gray-900 text-gray-400 text-center py-6 text-sm mt-4">
-    <p>&copy; {{ date('Y') }} FBK-Printing —
-        <a href="{{ route('accueil') }}" class="hover:text-white transition">Retour à l'accueil</a>
-    </p>
-</footer>
+@include('partials.footer-visitor')
 
 {{-- TOAST --}}
 <div id="toast">
@@ -297,7 +382,47 @@
 </div>
 
 <script>
+const discountTiers = [
+    { min: 20, pct: 10 },
+    { min: 15, pct: 7  },
+    { min: 10, pct: 5  },
+    { min: 5,  pct: 3  },
+];
+
+function getQty() {
+    return Math.max(1, parseInt(document.getElementById('qty-input').value) || 1);
+}
+
+function changeQty(delta) {
+    const input = document.getElementById('qty-input');
+    input.value = Math.max(1, (parseInt(input.value) || 1) + delta);
+    updateDiscountBadge();
+}
+
+function updateDiscountBadge() {
+    const qty   = getQty();
+    const badge = document.getElementById('qty-discount-badge');
+    const tier  = discountTiers.find(t => qty >= t.min);
+    if (tier) {
+        badge.textContent = '−' + tier.pct + '%';
+        badge.classList.remove('hidden');
+    } else {
+        badge.classList.add('hidden');
+    }
+}
+
+document.getElementById('qty-input').addEventListener('input', updateDiscountBadge);
+
+function updateCartBadge(count) {
+    document.querySelectorAll('#cart-count').forEach(el => {
+        el.textContent = count;
+        el.style.transform = 'scale(1.3)';
+        setTimeout(() => { el.style.transform = 'scale(1)'; }, 300);
+    });
+}
+
 function addToCart(id, btn) {
+    const qty = getQty();
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout...'; }
     fetch(`{{ url('/cart/add') }}/${id}`, {
         method: 'POST',
@@ -305,7 +430,8 @@ function addToCart(id, btn) {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'X-Requested-With': 'XMLHttpRequest'
-        }
+        },
+        body: JSON.stringify({ quantity: qty })
     })
     .then(response => {
         if (!response.ok) throw new Error();
@@ -313,23 +439,9 @@ function addToCart(id, btn) {
     })
     .then(data => {
         showToast(data.message || 'Produit ajouté au panier !');
-        // Mettre à jour le compteur du panier avec animation
-        console.log('Cart count:', data.count);
-        if (data.count !== undefined) {
-            document.querySelectorAll('#cart-count').forEach(el => {
-                console.log('Updating cart badge to:', data.count);
-                el.textContent = data.count;
-                el.style.transform = 'scale(1.3)';
-                setTimeout(() => {
-                    el.style.transform = 'scale(1)';
-                }, 300);
-            });
-        }
+        if (data.count !== undefined) updateCartBadge(data.count);
     })
-    .catch(err => {
-        console.error('Erreur lors de l\'ajout au panier:', err);
-        showToast('Impossible d\'ajouter ce produit.', 'error');
-    })
+    .catch(() => showToast('Impossible d\'ajouter ce produit.', 'error'))
     .finally(() => {
         if (btn) {
             setTimeout(() => {
@@ -341,44 +453,37 @@ function addToCart(id, btn) {
 }
 
 function buyNow(id, btn) {
+    const qty        = getQty();
+    const isCustomer = {{ auth()->check() && auth()->user()->isCustomer() ? 'true' : 'false' }};
+
+    if (isCustomer) {
+        window.location.href = '{{ url("/shop/buy-now") }}/' + id + '?qty=' + qty;
+        return;
+    }
+
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...'; }
-    
-    // Ajouter au panier et rediriger
+
     fetch(`{{ url('/cart/add') }}/${id}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
             'X-Requested-With': 'XMLHttpRequest'
-        }
+        },
+        body: JSON.stringify({ quantity: qty })
     })
     .then(response => {
-        console.log('Response:', response);
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) throw new Error('Erreur réseau');
         return response.json();
     })
     .then(data => {
-        console.log('Data received:', data);
-        // Mettre à jour le compteur du panier
-        if (data.count !== undefined) {
-            document.querySelectorAll('#cart-count').forEach(el => {
-                el.textContent = data.count;
-                el.style.transform = 'scale(1.3)';
-                setTimeout(() => {
-                    el.style.transform = 'scale(1)';
-                }, 300);
-            });
-        }
+        if (data.count !== undefined) updateCartBadge(data.count);
         showToast('Produit ajouté ! Redirection vers la connexion...');
-        // Rediriger vers la page de login avec l'ID du produit
-        const loginUrl = '{{ route("otp.login") }}?product_id=' + id;
-        console.log('Redirecting to:', loginUrl);
         setTimeout(() => {
-            window.location.href = loginUrl;
+            window.location.href = '{{ route("otp.login") }}?product_id=' + id + '&qty=' + qty;
         }, 500);
     })
-    .catch((error) => {
-        console.error('Erreur:', error);
+    .catch(error => {
         showToast('Impossible de passer la commande : ' + error.message, 'error');
         if (btn) {
             btn.disabled = false;
@@ -386,6 +491,11 @@ function buyNow(id, btn) {
         }
     });
 }
+
+document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+});
 
 function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');

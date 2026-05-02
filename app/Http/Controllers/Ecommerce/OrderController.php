@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Ecommerce;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ecommerce\OrderRequest;
+use App\Services\DiscountService;
 use App\Services\OrderService;
 use App\Services\PaymentService;
 use App\Services\Payment\OrangeMoneyService;
@@ -16,16 +17,25 @@ use Illuminate\Support\Facades\Log;
 class OrderController extends Controller
 {
     public function __construct(
-        private OrderService $orderService,
-        private PaymentService $paymentService,
+        private OrderService    $orderService,
+        private PaymentService  $paymentService,
         private OrangeMoneyService $orangeMoney,
+        private DiscountService $discountService,
     ) {}
 
-    public function buyNow($id)
+    public function buyNow($id, Request $request)
     {
         $product = Product::findOrFail($id);
-        session(['buy_now' => [['product_id' => $product->id, 'quantity' => 1]]]);
+        $qty     = max(1, (int) $request->input('qty', 1));
+        session()->forget('buy_now');
+        session(['buy_now' => [['product_id' => $product->id, 'quantity' => $qty]]]);
         return redirect()->route('checkout');
+    }
+
+    public function cancelCheckout()
+    {
+        session()->forget('buy_now');
+        return redirect()->route('panier');
     }
 
     public function checkout()
@@ -43,29 +53,27 @@ class OrderController extends Controller
         $products = Product::whereIn('id', array_column($cartItems, 'product_id'))->get();
 
         $subtotal = 0;
+        $discount = 0;
         $totalQty = 0;
+
         foreach ($products as $product) {
             foreach ($cartItems as $item) {
                 if ($item['product_id'] == $product->id) {
-                    $unitPrice = $product->promo_price ?? $product->price;
-                    $subtotal += $unitPrice * $item['quantity'];
-                    $totalQty += $item['quantity'];
+                    $unitPrice = $product->effective_price;
+                    $qty       = (int) $item['quantity'];
+                    $result    = $this->discountService->calculateItem($qty, $unitPrice);
+                    $subtotal += $unitPrice * $qty;
+                    $discount += $result['discount_amount'];
+                    $totalQty += $qty;
                 }
             }
         }
 
-        $discount = $totalQty >= \App\Services\OrderService::DISCOUNT_THRESHOLD
-            ? (int)($subtotal * \App\Services\OrderService::DISCOUNT_RATE)
-            : 0;
         $total = max(0, $subtotal - $discount);
-
-        $discountRate      = \App\Services\OrderService::DISCOUNT_RATE;
-        $discountThreshold = \App\Services\OrderService::DISCOUNT_THRESHOLD;
 
         return view('ecommerce.checkout', compact(
             'addresses', 'cartItems', 'products',
-            'subtotal', 'discount', 'total', 'totalQty', 'isBuyNow',
-            'discountRate', 'discountThreshold'
+            'subtotal', 'discount', 'total', 'totalQty', 'isBuyNow'
         ));
     }
 

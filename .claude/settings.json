@@ -23,7 +23,11 @@
       "Bash(curl -s -o /dev/null -w \"GET /product → %{http_code}\\\\n\" http://127.0.0.1:8003/product)",
       "Bash(curl -s -o /dev/null -w \"GET /contact → %{http_code}\\\\n\" http://127.0.0.1:8003/contact)",
       "Bash(curl -s -o /dev/null -w \"GET /catalogue → %{http_code}\\\\n\" http://127.0.0.1:8003/catalogue)",
-      "Bash(php -r ' *)"
+      "Bash(php -r ' *)",
+      "Bash(php -l app/Services/DiscountService.php)",
+      "Bash(php -l app/Http/Controllers/Api/PriceController.php)",
+      "Bash(php -l app/Http/Controllers/Ecommerce/CartController.php)",
+      "Bash(php -l routes/api.php)"
     ],
     "additionalDirectories": [
       "c:\\Users\\hp\\Zubista\\FBK-printing\\public"

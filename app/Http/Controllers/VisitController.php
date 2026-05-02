@@ -131,30 +131,91 @@ class VisitController extends Controller
         ];
     }
 
-    public function showProduct($id)
-    {
-        $product = \App\Models\Product::with('categories')->findOrFail($id);
-        $related = \App\Models\Product::with('categories')
-            ->whereHas('categories', function ($q) use ($product) {
-                $q->whereIn('categories.id', $product->categories->pluck('id'));
-            })
-            ->where('id', '!=', $id)
-            ->take(4)
-            ->get();
 
-        return view('visitor.productDetail', compact('product', 'related'));
+
+    public function search(Request $request)
+    {
+        $query = trim($request->input('q', ''));
+
+        if (strlen($query) < 2) {
+            return response()->json(['products' => [], 'categories' => []]);
+        }
+
+        $products = Product::with('categories')
+            ->where(function ($q) use ($query) {
+                $q->where('libelle', 'like', "%{$query}%")
+                  ->orWhere('description', 'like', "%{$query}%")
+                  ->orWhere('sku', 'like', "%{$query}%");
+            })
+            ->limit(6)
+            ->get()
+            ->map(fn($p) => [
+                'id'       => $p->id,
+                'name'     => $p->libelle,
+                'price'    => (float) $p->price,
+                'image'    => $p->image ? asset('products/' . $p->image) : null,
+                'url'      => route('productDetail', $p->id),
+                'category' => $p->categories->first()?->category_type ?? '',
+            ]);
+
+        $categories = Category::where('category_type', 'like', "%{$query}%")
+            ->orWhere('slug', 'like', "%{$query}%")
+            ->orWhere('description', 'like', "%{$query}%")
+            ->limit(4)
+            ->get()
+            ->map(fn($c) => [
+                'id'    => $c->id,
+                'name'  => $c->category_type ?? $c->slug,
+                'image' => null,
+                'url'   => route('products.index') . '?category=' . $c->id,
+            ]);
+
+        return response()->json([
+            'products'   => $products->values(),
+            'categories' => $categories->values(),
+        ]);
     }
 
     public function loadMoreProducts(Request $request)
     {
-        $offset = $request->input('offset', 0);
-        $products = Product::orderBy('created_at', 'desc')->paginate(12);
+        $offset   = max(0, (int) $request->input('offset', 0));
+        $products = Product::with('categories')
+                        ->orderBy('created_at', 'desc')
+                        ->skip($offset)
+                        ->take(12)
+                        ->get();
         $html = view('visitor.partials.product_cards', compact('products'))->render();
 
         return response()->json([
-            'html' => $html,
+            'html'  => $html,
             'count' => $products->count(),
         ]);
+    }
+
+    public function showProduct($id)
+    {
+        $product = Product::with('categories')->findOrFail($id);
+
+        $categoryIds = $product->categories->pluck('id');
+
+        $suggested = Product::with('categories')
+            ->whereHas('categories', fn($q) => $q->whereIn('categories.id', $categoryIds))
+            ->where('id', '!=', $product->id)
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+
+        if ($suggested->count() < 4) {
+            $exclude = $suggested->pluck('id')->push($product->id);
+            $fill = Product::with('categories')
+                ->whereNotIn('id', $exclude)
+                ->inRandomOrder()
+                ->take(4 - $suggested->count())
+                ->get();
+            $suggested = $suggested->merge($fill);
+        }
+
+        return view('visitor.productDetail', compact('product', 'suggested'));
     }
 
 }

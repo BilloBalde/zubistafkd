@@ -4,7 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>FBK-Printing - Spécialiste Matériaux d'Impression en Guinée</title>
+    <title>FBK Printing - Imprimerie en Guinée | Impression Professionnelle Conakry</title>
+
+    {{-- SEO Meta Tags --}}
+    <meta name="description" content="FBK Printing, votre imprimerie professionnelle en Guinée. Impression de flyers, banderoles, cartes de visite, kakémonos et plus encore à Conakry. Commandez en ligne rapidement.">
+    <meta name="keywords" content="fbkprinting, fbk printing, imprimerie, imprimerie Guinée, imprimerie Conakry, impression en ligne, impression professionnelle, flyers, banderoles, cartes de visite, kakémonos, impression Guinée, FBK">
+    <meta name="author" content="FBK Printing">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ url('/') }}">
+
+    {{-- Open Graph (Facebook, WhatsApp, LinkedIn) --}}
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url('/') }}">
+    <meta property="og:title" content="FBK Printing - Imprimerie Professionnelle en Guinée">
+    <meta property="og:description" content="Imprimerie en ligne à Conakry, Guinée. Flyers, banderoles, cartes de visite et bien plus. Livraison rapide partout en Guinée.">
+    <meta property="og:image" content="{{ asset('images/og-fbkprinting.jpg') }}">
+    <meta property="og:locale" content="fr_GN">
+    <meta property="og:site_name" content="FBK Printing">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="FBK Printing - Imprimerie Professionnelle en Guinée">
+    <meta name="twitter:description" content="Imprimerie en ligne à Conakry, Guinée. Flyers, banderoles, cartes de visite et bien plus.">
+    <meta name="twitter:image" content="{{ asset('images/og-fbkprinting.jpg') }}">
+
+    {{-- Structured Data (JSON-LD) --}}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "FBK Printing",
+        "alternateName": "FBKPrinting",
+        "description": "Imprimerie professionnelle en Guinée spécialisée dans l'impression de flyers, banderoles, cartes de visite et kakémonos.",
+        "url": "{{ url('/') }}",
+        "image": "{{ asset('images/og-fbkprinting.jpg') }}",
+        "telephone": "",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Conakry",
+            "addressCountry": "GN"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "9.6412",
+            "longitude": "-13.5784"
+        },
+        "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+            "opens": "08:00",
+            "closes": "18:00"
+        },
+        "sameAs": []
+    }
+    </script>
 
     {{-- Tailwind CSS CDN --}}
     <script src="https://cdn.tailwindcss.com"></script>
@@ -148,6 +201,80 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
+
+        /* ── Global Search ── */
+        .search-wrapper {
+            position: relative;
+        }
+        .search-input-box {
+            display: flex; align-items: center;
+            background: #f9fafb;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 999px;
+            overflow: hidden;
+            width: 0; opacity: 0;
+            transition: width 0.35s ease, opacity 0.25s ease, border-color 0.2s;
+        }
+        .search-input-box.open {
+            width: 240px; opacity: 1;
+            border-color: #f59e0b;
+        }
+        @media (max-width: 768px) {
+            .search-input-box.open { width: 180px; }
+        }
+        .search-input-box input {
+            border: none; background: transparent;
+            padding: 7px 12px; font-size: 13.5px;
+            color: #374151; outline: none; width: 100%;
+        }
+        .search-input-box input::placeholder { color: #9ca3af; }
+        .search-clear-btn {
+            padding: 0 10px; cursor: pointer;
+            color: #9ca3af; font-size: 13px;
+            background: none; border: none; line-height: 1;
+        }
+        .search-clear-btn:hover { color: #d97706; }
+        .search-dropdown {
+            position: absolute; top: calc(100% + 10px); right: 0;
+            width: 340px; max-height: 420px; overflow-y: auto;
+            background: #fff;
+            border: 1px solid #f3f4f6;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.13);
+            z-index: 200;
+            display: none;
+        }
+        .search-dropdown.show { display: block; }
+        .search-section-title {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .06em; color: #9ca3af;
+            padding: 10px 14px 4px;
+        }
+        .search-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 14px; cursor: pointer;
+            transition: background 0.15s;
+            text-decoration: none; color: inherit;
+        }
+        .search-item:hover { background: #fef3c7; }
+        .search-item-img {
+            width: 38px; height: 38px; border-radius: 8px;
+            object-fit: cover; flex-shrink: 0;
+            background: #f3f4f6;
+        }
+        .search-item-placeholder {
+            width: 38px; height: 38px; border-radius: 8px;
+            background: linear-gradient(135deg, #f5a962, #d4753c);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 15px; flex-shrink: 0;
+        }
+        .search-item-name { font-size: 13.5px; font-weight: 600; color: #1f2937; line-height: 1.2; }
+        .search-item-sub  { font-size: 11px; color: #9ca3af; margin-top: 1px; }
+        .search-empty {
+            text-align: center; padding: 22px 14px;
+            color: #9ca3af; font-size: 13px;
+        }
+        .search-divider { height: 1px; background: #f3f4f6; margin: 4px 0; }
         .feature-icon {
             width: 60px; height: 60px;
             background: linear-gradient(135deg, #f5a962, #f18d5c);
@@ -309,60 +436,70 @@
 
         .prod-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
         }
-        @media (max-width: 1024px) { .prod-grid { grid-template-columns: repeat(4, 1fr); } }
-        @media (max-width: 768px)  { .prod-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 480px)  { .prod-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 1280px) { .prod-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px)  { .prod-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px)  { .prod-grid { grid-template-columns: repeat(1, 1fr); } }
         .prod-card {
             background: #fff; border: 1.5px solid #f3f4f6;
-            border-radius: 20px; overflow: hidden;
-            transition: all 0.25s; cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border-radius: 22px; overflow: hidden;
+            transition: all 0.28s cubic-bezier(.34,1.1,.64,1); cursor: pointer;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column;
         }
         .prod-card:hover {
             border-color: #f59e0b;
-            transform: translateY(-4px);
-            box-shadow: 0 12px 28px rgba(245,158,11,0.15);
+            transform: translateY(-6px);
+            box-shadow: 0 18px 40px rgba(245,158,11,0.16);
         }
         .prod-img {
-            height: 180px; display: flex; align-items: center;
+            height: 220px; display: flex; align-items: center;
             justify-content: center; position: relative;
             background: #fafafa;
             overflow: hidden;
         }
-        .prod-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s, filter 0.3s; }
-        .prod-card:hover .prod-img img { transform: scale(1.05); }
+        .prod-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.35s, filter 0.3s; }
+        .prod-card:hover .prod-img img { transform: scale(1.07); }
         .prod-img img.lazy { filter: blur(10px); opacity: 0.7; }
         .prod-img img.lazy.loaded { filter: blur(0); opacity: 1; }
-        .prod-img .no-img { font-size: 48px; }
+        .prod-img .no-img { font-size: 56px; }
         .prod-badge {
-            position: absolute; top: 10px; left: 10px;
+            position: absolute; top: 12px; left: 12px;
             font-size: 10px; font-weight: 700;
-            padding: 4px 10px; border-radius: 20px;
+            padding: 4px 12px; border-radius: 20px;
             backdrop-filter: blur(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .badge-promo { background: rgba(254,243,199,0.95); color: #92400e; }
-        .badge-best { background: rgba(209,250,229,0.95); color: #065f46; }
+        .badge-promo { background: rgba(254,243,199,0.97); color: #92400e; }
+        .badge-best  { background: rgba(209,250,229,0.97); color: #065f46; }
+        .prod-cat-overlay {
+            position: absolute; bottom: 10px; right: 10px;
+            font-size: 10px; font-weight: 700; color: #fff;
+            background: rgba(217,119,6,0.88);
+            padding: 3px 10px; border-radius: 20px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+            letter-spacing: 0.02em;
+        }
 
-        .prod-info { padding: 14px 14px 16px; }
+        .prod-info { padding: 16px 16px 18px; display: flex; flex-direction: column; flex: 1; }
         .prod-name {
-            font-size: 13px; font-weight: 600; color: #1f2937;
-            margin-bottom: 3px; line-height: 1.4;
+            font-size: 14px; font-weight: 700; color: #1f2937;
+            margin-bottom: 8px; line-height: 1.45;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
-        .prod-cat-tag {
-            font-size: 11px; color: #fff; background: #f59e0b;
-            display: inline-block; padding: 2px 8px; border-radius: 20px;
-            margin-bottom: 8px; font-weight: 500;
+        .prod-stars {
+            font-size: 12px; color: #f59e0b; margin-bottom: 10px;
+            display: flex; align-items: center; gap: 4px;
         }
-        .prod-stars { font-size: 12px; color: #f59e0b; margin-bottom: 8px; }
+        .prod-stars .rating-num { color: #9ca3af; font-size: 11px; font-weight: 500; }
         .prod-price-row {
-            display: flex; align-items: baseline; gap: 6px;
+            display: flex; align-items: baseline; gap: 8px;
             margin-bottom: 12px; flex-wrap: wrap;
         }
-        .prod-price { font-size: 17px; font-weight: 700; color: #d97706; }
+        .prod-price { font-size: 20px; font-weight: 800; color: #d97706; }
         .prod-price-old {
             font-size: 12px; color: #9ca3af;
             text-decoration: line-through;
@@ -373,24 +510,25 @@
             background: #fef2f2; border: 1px solid #fca5a5;
             border-radius: 6px; padding: 3px 8px; margin-bottom: 8px;
         }
-        .prod-btns { display: flex; gap: 6px; }
+        .prod-btns { display: flex; gap: 8px; margin-top: auto; }
         .prod-btn {
-            flex: 1; padding: 9px 4px; font-size: 11px;
-            font-weight: 600; text-align: center;
+            flex: 1; padding: 11px 6px; font-size: 12px;
+            font-weight: 700; text-align: center;
             background: linear-gradient(135deg, #f5a962, #d97706);
-            color: #fff; border: none; border-radius: 10px; cursor: pointer;
-            transition: opacity 0.2s, transform 0.1s;
+            color: #fff; border: none; border-radius: 12px; cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
             font-family: 'Poppins', sans-serif;
+            box-shadow: 0 4px 14px rgba(217,119,6,0.25);
         }
-        .prod-btn:hover { opacity: 0.88; transform: scale(1.02); }
+        .prod-btn:hover { opacity: 0.9; transform: scale(1.03); box-shadow: 0 6px 20px rgba(217,119,6,0.35); }
         .prod-btn-order {
-            flex: 1; padding: 9px 4px; font-size: 11px;
-            font-weight: 600; text-align: center;
+            flex: 1; padding: 11px 6px; font-size: 12px;
+            font-weight: 700; text-align: center;
             background: none; color: #d97706;
-            border: 2px solid #d97706; border-radius: 10px; cursor: pointer;
+            border: 2px solid #d97706; border-radius: 12px; cursor: pointer;
             transition: all 0.2s; font-family: 'Poppins', sans-serif;
         }
-        .prod-btn-order:hover { background: #d97706; color: #fff; transform: scale(1.02); }
+        .prod-btn-order:hover { background: #d97706; color: #fff; transform: scale(1.03); box-shadow: 0 4px 14px rgba(217,119,6,0.25); }
 
         .empty-state {
             text-align: center; padding: 3rem 1rem;
@@ -600,6 +738,38 @@
             position: relative;
             display: inline-block;
         }
+
+        /* ── Quantity Discount Widget ── */
+        .qty-widget { border-top: 1px solid #f3f4f6; padding-top: 10px; margin-bottom: 10px; }
+        .qty-row { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+        .qty-label { font-size:11px; color:#6b7280; font-weight:500; white-space:nowrap; }
+        .qty-input {
+            width:50px; padding:4px 6px; font-size:13px; font-weight:600; text-align:center;
+            border:1.5px solid #e5e7eb; border-radius:8px; background:#fff; color:#374151;
+            font-family:'Poppins',sans-serif; outline:none; transition:border-color 0.2s;
+        }
+        .qty-input:focus { border-color:#f59e0b; }
+        .qty-btn {
+            width:26px; height:26px; flex-shrink:0;
+            background:#f3f4f6; border:none; border-radius:6px;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; font-size:15px; line-height:1; color:#374151;
+            transition:background 0.2s; font-family:'Poppins',sans-serif;
+        }
+        .qty-btn:hover { background:#fef3c7; color:#d97706; }
+        .disc-info { min-height:32px; }
+        .disc-badge {
+            display:inline-flex; align-items:center; gap:3px;
+            font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px;
+            background:rgba(254,243,199,0.95); color:#92400e; margin-bottom:3px;
+            animation:badgePop 0.25s cubic-bezier(.34,1.56,.64,1);
+        }
+        .disc-saving {
+            font-size:10px; color:#059669; font-weight:600; margin-top:2px;
+        }
+        @keyframes badgePop { from{transform:scale(0.7);opacity:0}to{transform:scale(1);opacity:1} }
+        .price-animate { animation:priceFlip 0.28s ease; }
+        @keyframes priceFlip { 0%{opacity:0;transform:translateY(-5px)}100%{opacity:1;transform:translateY(0)} }
     </style>
 </head>
 <body class="bg-white">
@@ -622,6 +792,21 @@
                     <a href="#contact" class="text-gray-700 font-medium hover:text-amber-600 transition">Contact</a>                   
                 </div>
                <div class="flex items-center space-x-4">
+
+                    {{-- ── Recherche globale ── --}}
+                    <div class="search-wrapper" id="searchWrapper">
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <div class="search-input-box" id="searchInputBox">
+                                <input type="text" id="globalSearchInput" placeholder="Produits, catégories…" autocomplete="off">
+                                <button class="search-clear-btn" id="searchClearBtn" title="Effacer"><i class="fas fa-times"></i></button>
+                            </div>
+                            <button id="searchToggleBtn" class="p-2 text-gray-600 hover:text-amber-600 transition" title="Rechercher">
+                                <i class="fas fa-search text-lg"></i>
+                            </button>
+                        </div>
+                        <div class="search-dropdown" id="searchDropdown"></div>
+                    </div>
+
                     @auth
                         @if(Auth::user()->isCustomer())
                             <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-amber-600 transition font-medium text-sm">
@@ -991,38 +1176,52 @@
                     </h3>
                     <div class="prod-grid" id="grid-all">
                         @foreach($allProducts->take(10) as $p)
-                        <div class="prod-card" style="cursor:pointer;" onclick="window.location='{{ route('productDetail', $p['id']) }}'">
+                        <div class="prod-card" onclick="window.location='{{ route('productDetail', $p['id']) }}'">
+                            {{-- Image --}}
                             <div class="prod-img">
                                 @if($p['image'])
                                     <img src="{{ $p['image'] }}" alt="{{ $p['name'] }}"
-                                         onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='block'">
-                                    <span class="no-img" style="display:none">🧴</span>
+                                         onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'">
+                                    <span class="no-img" style="display:none">🖨️</span>
                                 @else
                                     <span class="no-img">🖨️</span>
                                 @endif
                                 @if($p['old_price'])
                                     <span class="prod-badge badge-promo">-{{ $p['discount'] }}%</span>
                                 @endif
+                                <span class="prod-cat-overlay">{{ $p['category_name'] }}</span>
                             </div>
+                            {{-- Infos --}}
                             <div class="prod-info">
-                                <div class="prod-cat-tag">{{ $p['category_name'] }}</div>
                                 <div class="prod-name">{{ $p['name'] }}</div>
                                 <div class="prod-stars">
                                     @for($i = 1; $i <= 5; $i++)
-                                        @if($i <= floor($p['rating']))★@else☆@endif
+                                        @if($i <= floor($p['rating']))<span>★</span>@else<span style="color:#e5e7eb">★</span>@endif
                                     @endfor
+                                    <span class="rating-num">{{ number_format($p['rating'], 1) }}</span>
                                 </div>
-                                <div class="prod-price-row">
-                                    <span class="prod-price">{{ number_format($p['price'], 0, ',', ' ') }} GNF</span>
-                                    @if($p['old_price'])
-                                        <span class="prod-price-old">{{ number_format($p['old_price'], 0, ',', ' ') }} GNF</span>
-                                    @endif
+                                <div class="qty-widget" data-product-id="{{ $p['id'] }}" onclick="event.stopPropagation()">
+                                    <div class="qty-row">
+                                        <span class="qty-label">Qté&nbsp;:</span>
+                                        <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
+                                        <input class="qty-input" type="number" value="1" min="1" max="9999"
+                                               oninput="recalcPrice(this)">
+                                        <button class="qty-btn" onclick="changeQty(this,1)">+</button>
+                                    </div>
+                                    <div class="disc-info">
+                                        <div class="prod-price-row">
+                                            <span class="prod-price price-val">{{ number_format($p['price'], 0, ',', ' ') }} GNF</span>
+                                            @if($p['old_price'])
+                                                <span class="prod-price-old">{{ number_format($p['old_price'], 0, ',', ' ') }} GNF</span>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="prod-btns">
-                                    <button class="prod-btn" onclick="event.stopPropagation();addToCart({{ $p['id'] }})">
+                                    <button class="prod-btn" onclick="event.stopPropagation();addToCartWithQty({{ $p['id'] }})">
                                         <i class="fas fa-shopping-bag mr-1"></i> Panier
                                     </button>
-                                    <button class="prod-btn-order" onclick="event.stopPropagation();orderNow({{ $p['id'] }})">
+                                    <button class="prod-btn-order" onclick="event.stopPropagation();orderNowWithQty({{ $p['id'] }})">
                                         <i class="fas fa-bolt mr-1"></i> Commander
                                     </button>
                                 </div>
@@ -1468,50 +1667,7 @@
     {{-- ══════════════════════════════════════════
          FOOTER
     ══════════════════════════════════════════ --}}
-    <footer class="bg-gray-900 text-gray-300 py-12">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <div>
-                    <div class="flex items-center space-x-2 mb-4">
-                        <img src="{{ asset('assets/img/fbk.png') }}" alt="FBK-Printing" class="h-8 w-auto object-contain">
-                        <span class="font-bold text-white">FBK-Printing</span>
-                    </div>
-                    <p class="text-sm text-gray-400">Spécialiste en matériaux d'imprimantes — papier, encre, rouleaux, presses — basé à Conakry, Guinée.</p>
-                </div>
-                <div>
-                    <h4 class="font-bold text-white mb-4">Liens utiles</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#apropos" class="text-gray-400 hover:text-white transition">À propos</a></li>
-                        <li><a href="#produits" class="text-gray-400 hover:text-white transition">Produits</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Blog</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Recrutement</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-white mb-4">Aide</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#contact" class="text-gray-400 hover:text-white transition">Contact</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">FAQ</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Politique de retour</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition">Mentions légales</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-white mb-4">Suivez-nous</h4>
-                    <div class="flex space-x-4">
-                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-amber-600 transition"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-amber-600 transition"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-amber-600 transition"><i class="fab fa-pinterest"></i></a>
-                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-white hover:bg-amber-600 transition"><i class="fab fa-youtube"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
-                <p>&copy; {{ date('Y') }} FBK-Printing. Tous droits réservés. Conakry, Guinée.</p>
-                <p class="mt-2">Conçu avec <i class="fas fa-heart text-red-500"></i> pour l'impression professionnelle</p>
-            </div>
-        </div>
-    </footer>
+    @include('partials.footer-visitor')
 
     {{-- ══════════════════════════════════════════
          SCRIPTS
@@ -1526,42 +1682,59 @@
 
         /* ── Rendu d'une carte produit ── */
         function renderCard(p) {
-            const stars    = '★'.repeat(Math.floor(p.rating)) + (p.rating % 1 >= 0.5 ? '½' : '');
+            const rating   = parseFloat(p.rating) || 0;
+            const starsHTML = [1,2,3,4,5].map(i =>
+                `<span style="color:${i <= Math.floor(rating) ? '#f59e0b' : '#e5e7eb'}">★</span>`
+            ).join('');
             const isPromo  = !!p.old_price;
             const badgeTxt = isPromo ? `-${p.discount}%` : 'Top vente';
             const badgeCls = isPromo ? 'badge-promo' : 'badge-best';
             const oldHTML  = p.old_price
                 ? `<span class="prod-price-old">${Number(p.old_price).toLocaleString('fr-FR')} GNF</span>`
                 : '';
-            
             const imgHTML = p.image
-                ? `<img class="lazy" data-src="${p.image}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23f0f0f0' width='400' height='400'/%3E%3C/svg%3E" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='https://placehold.co/400x400?text=Introuvable'">`
-                : `<span class="no-img">🖨️</span>`;
+                ? `<img class="lazy" data-src="${p.image}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23f0f0f0' width='400' height='400'/%3E%3C/svg%3E" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                : '';
             const countdownHTML = p.promo_ends_at
                 ? `<div class="promo-countdown" data-ends="${p.promo_ends_at}">
                        <i class="fas fa-clock" style="font-size:10px;"></i> <span class="countdown-label">—</span>
                    </div>`
                 : '';
 
-            return `<div class="prod-card" style="cursor:pointer;" onclick="window.location='/product/${p.id}'">
+            return `<div class="prod-card" onclick="window.location='/product/${p.id}'">
                 <div class="prod-img">
                     <span class="prod-badge ${badgeCls}">${badgeTxt}</span>
                     ${imgHTML}
+                    <span class="no-img" ${p.image ? 'style="display:none"' : ''}>🖨️</span>
+                    <span class="prod-cat-overlay">${p.category_name ?? ''}</span>
                 </div>
                 <div class="prod-info">
                     <div class="prod-name">${p.name}</div>
-                    <div class="prod-cat-tag">${p.category_name ?? ''}</div>
-                    <div class="prod-stars">${stars} <span style="color:#9ca3af;font-size:11px;">${parseFloat(p.rating).toFixed(1)}</span></div>
-                    <div class="prod-price-row">
-                        <span class="prod-price">${Number(p.price).toLocaleString('fr-FR')} GNF</span>
-                        ${oldHTML}
+                    <div class="prod-stars">
+                        ${starsHTML}
+                        <span class="rating-num">${rating.toFixed(1)}</span>
                     </div>
-                    ${countdownHTML}
+                    <div class="qty-widget" data-product-id="${p.id}" onclick="event.stopPropagation()">
+                        <div class="qty-row">
+                            <span class="qty-label">Qté&nbsp;:</span>
+                            <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
+                            <input class="qty-input" type="number" value="1" min="1" max="9999"
+                                   oninput="recalcPrice(this)">
+                            <button class="qty-btn" onclick="changeQty(this,1)">+</button>
+                        </div>
+                        <div class="disc-info">
+                            <div class="prod-price-row">
+                                <span class="prod-price price-val">${Number(p.price).toLocaleString('fr-FR')} GNF</span>
+                                ${oldHTML}
+                            </div>
+                            ${countdownHTML}
+                        </div>
+                    </div>
                     <div class="prod-btns">
-                        <button class="prod-btn" onclick="event.stopPropagation();addToCart(${p.id})">
+                        <button class="prod-btn" onclick="event.stopPropagation();addToCartWithQty(${p.id})">
                             <i class="fas fa-shopping-bag mr-1"></i> Panier
                         </button>
-                        <button class="prod-btn-order" onclick="event.stopPropagation();orderNow(${p.id})">
+                        <button class="prod-btn-order" onclick="event.stopPropagation();orderNowWithQty(${p.id})">
                             <i class="fas fa-bolt mr-1"></i> Commander
                         </button>
                     </div>
@@ -1807,6 +1980,111 @@
         setInterval(tickCountdowns, 1000);
         tickCountdowns();
 
+        /* ═══════════════════════════════════════
+           QUANTITY DISCOUNT WIDGET
+        ═══════════════════════════════════════ */
+        const _qtyTimers = new Map();
+
+        function recalcPrice(inputEl) {
+            const widget = inputEl.closest('.qty-widget');
+            if (!widget) return;
+            const productId = widget.dataset.productId;
+            const qty = Math.max(1, parseInt(inputEl.value) || 1);
+            inputEl.value = qty;
+
+            clearTimeout(_qtyTimers.get(widget));
+            _qtyTimers.set(widget, setTimeout(() => {
+                fetch(`/calculate-price?product_id=${productId}&quantity=${qty}`)
+                    .then(r => r.json())
+                    .then(data => _updateDiscountUI(widget, data))
+                    .catch(() => {});
+            }, 280));
+        }
+
+        function changeQty(btnEl, delta) {
+            const input = btnEl.closest('.qty-row').querySelector('.qty-input');
+            input.value = Math.max(1, (parseInt(input.value) || 1) + delta);
+            recalcPrice(input);
+        }
+
+        function _updateDiscountUI(widget, data) {
+            const discInfo = widget.querySelector('.disc-info');
+            if (!discInfo) return;
+            const fmt     = n => Number(n).toLocaleString('fr-FR');
+            const rawTotal = data.unit_price * data.quantity;
+            let html = '<div class="prod-price-row" style="flex-wrap:wrap;gap:4px;align-items:baseline;">';
+            if (data.discount_percent > 0) {
+                html += `<span class="disc-badge"><i class="fas fa-tag" style="font-size:8px;"></i>&nbsp;-${data.discount_percent}%</span>`;
+            }
+            html += `<span class="prod-price price-val price-animate">${fmt(data.final_price)} GNF</span>`;
+            if (data.discount_percent > 0) {
+                html += `<span class="prod-price-old">${fmt(rawTotal)} GNF</span>`;
+            }
+            html += '</div>';
+            if (data.discount_percent > 0) {
+                html += `<div class="disc-saving"><i class="fas fa-check-circle" style="font-size:9px;"></i> Économie&nbsp;: ${fmt(data.discount_amount)} GNF</div>`;
+            }
+            discInfo.innerHTML = html;
+        }
+
+        function _getQtyForProduct(productId) {
+            const widget = document.querySelector(`.qty-widget[data-product-id="${productId}"]`);
+            return widget ? Math.max(1, parseInt(widget.querySelector('.qty-input').value) || 1) : 1;
+        }
+
+        function addToCartWithQty(productId) {
+            const qty = _getQtyForProduct(productId);
+            fetch(`{{ url('/cart/add') }}/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ quantity: qty })
+            })
+            .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+            .then(data => {
+                const badge = document.getElementById('cart-count');
+                if (badge && data.count !== undefined) {
+                    badge.textContent = data.count;
+                    badge.style.transform = 'scale(1.5)';
+                    setTimeout(() => badge.style.transform = 'scale(1)', 300);
+                }
+                showToast(`${qty} article${qty > 1 ? 's' : ''} ajouté${qty > 1 ? 's' : ''} au panier !`);
+            })
+            .catch(() => showToast('Impossible d\'ajouter ce produit.', 'error'));
+        }
+
+        function orderNowWithQty(productId) {
+            const qty = _getQtyForProduct(productId);
+            fetch(`{{ url('/cart/add') }}/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ quantity: qty })
+            })
+            .then(r => r.json())
+            .then(data => {
+                const badge = document.getElementById('cart-count');
+                if (badge && data.count !== undefined) {
+                    badge.textContent = data.count;
+                    badge.style.transform = 'scale(1.3)';
+                    setTimeout(() => badge.style.transform = 'scale(1)', 300);
+                }
+                showToast('Produit ajouté ! Redirection...');
+                @if(auth()->check() && auth()->user()->isCustomer())
+                    setTimeout(() => { window.location.href = '{{ route("checkout") }}'; }, 500);
+                @else
+                    setTimeout(() => { window.location.href = '{{ route("otp.login") }}?product_id=' + productId; }, 500);
+                @endif
+            })
+            .catch(() => showToast('Impossible de passer la commande', 'error'));
+        }
+
         /* ── Init ── */
         filterProducts('best');
         filterProducts('promo');
@@ -2002,6 +2280,135 @@
 
             startAuto();
         })();
+    </script>
+
+    {{-- ── Global Search Script ── --}}
+    <script>
+    (function () {
+        const searchUrl    = '{{ route("search") }}';
+        const toggleBtn    = document.getElementById('searchToggleBtn');
+        const inputBox     = document.getElementById('searchInputBox');
+        const input        = document.getElementById('globalSearchInput');
+        const clearBtn     = document.getElementById('searchClearBtn');
+        const dropdown     = document.getElementById('searchDropdown');
+        const wrapper      = document.getElementById('searchWrapper');
+        let debounceTimer  = null;
+        let isOpen         = false;
+
+        function openSearch() {
+            isOpen = true;
+            inputBox.classList.add('open');
+            setTimeout(() => input.focus(), 50);
+        }
+
+        function closeSearch() {
+            isOpen = false;
+            inputBox.classList.remove('open');
+            dropdown.classList.remove('show');
+            input.value = '';
+            dropdown.innerHTML = '';
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            if (isOpen) { closeSearch(); } else { openSearch(); }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            input.value = '';
+            dropdown.classList.remove('show');
+            dropdown.innerHTML = '';
+            input.focus();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) closeSearch();
+        });
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSearch();
+        });
+
+        input.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            const q = input.value.trim();
+            if (q.length < 2) {
+                dropdown.classList.remove('show');
+                dropdown.innerHTML = '';
+                return;
+            }
+            debounceTimer = setTimeout(() => fetchResults(q), 280);
+        });
+
+        function fetchResults(q) {
+            fetch(searchUrl + '?q=' + encodeURIComponent(q), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(r => r.json())
+            .then(data => renderDropdown(data, q))
+            .catch(() => {});
+        }
+
+        function highlight(text, q) {
+            const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            return text.replace(new RegExp('(' + escaped + ')', 'gi'),
+                '<mark style="background:#fef3c7;color:#92400e;border-radius:2px;padding:0 1px">$1</mark>');
+        }
+
+        function renderDropdown(data, q) {
+            const products   = data.products   || [];
+            const categories = data.categories || [];
+
+            if (!products.length && !categories.length) {
+                dropdown.innerHTML = '<div class="search-empty"><i class="fas fa-search-minus" style="font-size:22px;margin-bottom:6px;display:block;opacity:.4"></i>Aucun résultat pour « ' + q + ' »</div>';
+                dropdown.classList.add('show');
+                return;
+            }
+
+            let html = '';
+
+            if (categories.length) {
+                html += '<div class="search-section-title"><i class="fas fa-th-large" style="margin-right:4px"></i>Catégories</div>';
+                categories.forEach(c => {
+                    const img = c.image
+                        ? `<img src="${c.image}" alt="${c.name}" class="search-item-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                        : '';
+                    const placeholder = `<div class="search-item-placeholder" ${c.image ? 'style="display:none"' : ''}><i class="fas fa-th-large"></i></div>`;
+                    html += `<a href="${c.url}" class="search-item">
+                        ${img}${placeholder}
+                        <div>
+                            <div class="search-item-name">${highlight(c.name, q)}</div>
+                            <div class="search-item-sub">Catégorie</div>
+                        </div>
+                    </a>`;
+                });
+            }
+
+            if (products.length && categories.length) {
+                html += '<div class="search-divider"></div>';
+            }
+
+            if (products.length) {
+                html += '<div class="search-section-title"><i class="fas fa-box-open" style="margin-right:4px"></i>Produits</div>';
+                products.forEach(p => {
+                    const img = p.image
+                        ? `<img src="${p.image}" alt="${p.name}" class="search-item-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+                        : '';
+                    const placeholder = `<div class="search-item-placeholder" ${p.image ? 'style="display:none"' : ''}><i class="fas fa-box-open"></i></div>`;
+                    const price = p.price > 0 ? `<span style="color:#d97706;font-weight:700">${p.price.toLocaleString('fr-FR')} GNF</span>` : '';
+                    html += `<a href="${p.url}" class="search-item">
+                        ${img}${placeholder}
+                        <div style="flex:1;min-width:0">
+                            <div class="search-item-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${highlight(p.name, q)}</div>
+                            <div class="search-item-sub">${p.category ? p.category + ' · ' : ''}${price}</div>
+                        </div>
+                    </a>`;
+                });
+            }
+
+            dropdown.innerHTML = html;
+            dropdown.classList.add('show');
+        }
+    })();
     </script>
 </body>
 </html>
