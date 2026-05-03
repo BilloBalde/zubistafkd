@@ -74,9 +74,21 @@
         /* ── Hero ── */
         .hero-section {
             background: linear-gradient(135deg, #1a0a00 0%, #3d1a00 40%, #6b3200 70%, #d4753c 100%);
-            min-height: 700px;
+            height: 100vh;
+            width: 100%;
             position: relative;
             overflow: hidden;
+            display: flex;
+            align-items: stretch;
+            padding: 0 40px 40px 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            height: 100%;
+            display: flex;
+            padding-top: 60px;
         }
         .hero-section::before {
             content: '';
@@ -92,16 +104,16 @@
             background: radial-gradient(circle, rgba(212,117,60,0.15) 0%, transparent 70%);
             border-radius: 50%;
         }
-        .hero-content { position: relative; z-index: 10; }
-
         /* ── Hero Carousel ── */
         .hero-carousel {
             position: relative;
             width: 100%;
-            height: 560px;
+            height: 100%;
+            display: flex; align-items: center; justify-content: flex-end;
         }
         .hero-slide {
-            position: absolute; inset: 0;
+            position: absolute; 
+            top: 0; left: 0; right: 0; bottom: 0;
             opacity: 0;
             transition: opacity 0.7s ease, transform 0.7s ease;
             transform: translateX(40px) scale(0.97);
@@ -201,6 +213,45 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
+        .navbar-transparent .container {
+            padding: 0 !important;
+        }
+        .navbar-transparent .container > div {
+            display: flex !important;
+            align-items: center;
+            height: 80px;
+            padding: 0 20px;
+            width: 100%;
+            gap: 20px;
+        }
+        .navbar-transparent .flex.items-center.space-x-2 {
+            gap: 12px !important;
+            flex-wrap: nowrap;
+            flex-shrink: 0;
+        }
+        .navbar-transparent .hidden.md\:flex {
+            display: flex !important;
+            gap: 5px !important;
+            flex-wrap: nowrap;
+            flex: 1;
+            justify-content: center;
+        }
+        .navbar-transparent .hidden.md\:flex a {
+            white-space: nowrap !important;
+            font-size: 16px !important;
+        }
+        .navbar-transparent .flex.items-center.space-x-4 {
+            display: flex;
+            gap: 16px !important;
+            align-items: center;
+            flex-wrap: nowrap;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        .navbar-transparent a[href="{{ route('panier') }}"] {
+            margin-left: auto !important;
+            margin-right: 0 !important;
+        }
 
         /* ── Global Search ── */
         .search-wrapper {
@@ -212,15 +263,16 @@
             border: 1.5px solid #e5e7eb;
             border-radius: 999px;
             overflow: hidden;
-            width: 0; opacity: 0;
+            width: 240px; opacity: 1;
             transition: width 0.35s ease, opacity 0.25s ease, border-color 0.2s;
         }
         .search-input-box.open {
-            width: 240px; opacity: 1;
+            width: 200px; opacity: 1;
             border-color: #f59e0b;
         }
         @media (max-width: 768px) {
-            .search-input-box.open { width: 180px; }
+            .search-input-box.open { width: 140px; }
+            .search-input-box { width: 140px; }
         }
         .search-input-box input {
             border: none; background: transparent;
@@ -282,6 +334,9 @@
             display: flex; align-items: center; justify-content: center;
             color: white; font-size: 28px;
             margin: 0 auto 20px;
+        }
+         .search-item.active {
+            background: #fef3c7;
         }
 
         /* ══════════════════════════════════════
@@ -772,14 +827,14 @@
         @keyframes priceFlip { 0%{opacity:0;transform:translateY(-5px)}100%{opacity:1;transform:translateY(0)} }
     </style>
 </head>
-<body class="bg-white">
+<body class="bg-white pt-20">
 
     {{-- ══════════════════════════════════════════
          NAVIGATION
     ══════════════════════════════════════════ --}}
     <nav class="navbar-transparent">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
+            <div class="flex items-center h-20">
                 <div class="flex items-center space-x-2">
                     <img src="{{ asset('assets/img/fbk.png') }}" alt="FBK-Printing" class="h-10 w-auto object-contain">
                     <span class="text-xl font-bold text-gray-800 hidden sm:inline">FBK-Printing</span>
@@ -858,12 +913,12 @@
     {{-- ══════════════════════════════════════════
         HERO — Carousel élégant
     ══════════════════════════════════════════ --}}
-    <section id="accueil" class="hero-section pt-28 pb-16">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="hero-content grid grid-cols-1 lg:grid-cols-5 gap-10 items-center min-h-[580px]">
+    <section id="accueil" class="hero-section">
 
-                {{-- ── Côté texte ── --}}
-                <div class="flex flex-col justify-center lg:col-span-2">
+        <div class="hero-content flex flex-col lg:flex-row w-full h-full">
+
+            {{-- ── Côté texte ── --}}
+            <div class="w-full lg:w-1/3 h-full flex flex-col justify-center px-8 lg:px-16">
 
                     {{-- Badge --}}
                     <div class="hero-badge mb-5 w-fit">
@@ -913,8 +968,8 @@
                 </div>
 
                 {{-- ── Côté carousel ── --}}
-                <div class="flex justify-center lg:justify-end lg:col-span-3">
-                    <div class="relative w-full">
+                <div class="w-full lg:w-2/3 h-full flex items-center">
+                    <div class="relative w-full h-full">
 
                         {{-- Carousel --}}
                         <div class="hero-carousel shadow-2xl rounded-3xl overflow-hidden border border-white/10" id="heroCarousel">
@@ -941,10 +996,13 @@
                             @endforeach
 
                             {{-- Flèches --}}
-                            <button class="carousel-arrow prev" id="heroPrev" aria-label="Précédent">
+                            <button id="heroPrev"
+                                class="carousel-arrow prev bg-black/70 text-white hover:bg-black">
                                 <i class="fas fa-chevron-left text-xs"></i>
                             </button>
-                            <button class="carousel-arrow next" id="heroNext" aria-label="Suivant">
+
+                            <button id="heroNext"
+                                class="carousel-arrow next bg-black/70 text-white hover:bg-black">
                                 <i class="fas fa-chevron-right text-xs"></i>
                             </button>
                         </div>
@@ -966,20 +1024,9 @@
                                 <div class="text-xs text-gray-500">Haute résolution</div>
                             </div>
                         </div>
-                        <div class="floating-card card-bot">
-                            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                                <i class="fas fa-truck text-green-600 text-xs"></i>
-                            </div>
-                            <div>
-                                <div class="text-xs font-bold text-gray-800">Livraison rapide</div>
-                                <div class="text-xs text-gray-500">Partout en Guinée</div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
-            </div>
-        </div>
     </section>
 
     {{-- ══════════════════════════════════════════
@@ -1217,6 +1264,10 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div style="font-size:10px;color:#92400e;background:#fef3c7;border:1px solid #fde68a;border-radius:6px;padding:4px 8px;margin:4px 0 6px;display:flex;align-items:center;gap:5px;line-height:1.3;">
+                                    <i class="fas fa-tags" style="font-size:9px;color:#d97706;flex-shrink:0;"></i>
+                                    <span><strong>Remise dès 5 pcs</strong> &nbsp;·&nbsp; −3% → −10% sur la quantité</span>
+                                </div>
                                 <div class="prod-btns">
                                     <button class="prod-btn" onclick="event.stopPropagation();addToCartWithQty({{ $p['id'] }})">
                                         <i class="fas fa-shopping-bag mr-1"></i> Panier
@@ -1446,7 +1497,7 @@
     {{-- ══════════════════════════════════════════
          À PROPOS
     ══════════════════════════════════════════ --}}
-    <section id="apropos" class="py-20 bg-gray-50">
+      <section id="apropos" class="py-20 bg-gray-50">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                 <div>
@@ -1457,7 +1508,7 @@
                         FBK <span class="gradient-text">Printing</span> Industrie
                     </h2>
                     <p class="text-gray-600 text-lg leading-relaxed mb-6">
-                        Nous sommes <strong>FBK Printing Industrie</strong>, votre fournisseur spécialisé en <strong>matériaux d'imprimantes</strong> en Guinée. Papiers, rouleaux thermiques, encres, cartouches, presses et accessoires — nous équipons les professionnels et particuliers depuis notre boutique de <strong>Gare Voiture Linsan, Madina Marché</strong>.
+                        Nous sommes <strong>FBK Printing Industrie</strong>, votre fournisseur spécialisé en <strong>matériaux d'imprimantes</strong> <strong>Nos addresses principales sont  Cimenterie/Matoto/Dixin/Coyah. Nous offrons des consommables d'impression de haute qualité</strong>.
                     </p>
                     <p class="text-gray-600 leading-relaxed mb-8">
                         Notre mission : vous fournir des consommables d'impression de qualité professionnelle, compatibles avec toutes les grandes marques d'imprimantes, à des prix accessibles et avec un service de proximité.
@@ -1469,7 +1520,8 @@
                             </div>
                             <div>
                                 <p class="text-xs text-gray-400 font-medium">Localisation</p>
-                                <p class="text-sm font-semibold text-gray-700">Madina Marché, Conakry</p>
+                                <p class="text-sm font-semibold text-gray-700"> <strong>Adresses principales: Cimenterie/Matoto/Dixin/Coyah</strong> <br>
+                                <strong>Contact 628403565(WhatsApp,WeChat)</strong></p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3 bg-white rounded-xl px-5 py-3 shadow-sm border border-gray-100">
@@ -1490,11 +1542,12 @@
                                 <i class="fas fa-print text-white text-4xl"></i>
                             </div>
                             <h3 class="text-2xl font-bold mb-2">FBK Printing</h3>
-                            <p class="text-white/80 text-sm mb-6">Spécialiste matériaux d'impression<br>Gare Voiture Linsan, Madina Marché — Conakry</p>
+                            <p class="text-white/80 text-sm mb-6">Spécialiste matériaux d'impression<br> <strong>Adresses principales: Cimenterie/Matoto/Dixin/Coyah</strong> <br>
+                            </p>
                             <div class="space-y-3 text-left">
                                 <div class="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-2">
                                     <i class="fas fa-phone text-white/80 text-sm"></i>
-                                    <span class="text-sm">+224 626 311 915</span>
+                                    <span class="text-sm"> <strong> Téléphone:</strong> Contact 628403565(WhatsApp,WeChat)</span>
                                 </div>
                                 <div class="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-2">
                                     <i class="fas fa-envelope text-white/80 text-sm"></i>
@@ -1596,7 +1649,7 @@
     {{-- ══════════════════════════════════════════
          CONTACT
     ══════════════════════════════════════════ --}}
-    <section id="contact" class="py-20 bg-white">
+      <section id="contact" class="py-20 bg-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-14">
                 <span class="inline-block px-4 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-semibold mb-4">
@@ -1613,14 +1666,14 @@
                 <div class="text-center bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-amber-300 hover:shadow-lg transition duration-300">
                     <div class="feature-icon mx-auto mb-5"><i class="fas fa-map-marker-alt"></i></div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Adresse</h3>
-                    <p class="text-gray-600 leading-relaxed">Guinée Conakry<br>Madina Marché<br>Gare Voiture Linsan</p>
+                    <p class="text-gray-600 leading-relaxed">Nos addresses principales  <strong>Cimenterie/Matoto/Dixin
+                        <br> Coyah</strong>.</p>
                 </div>
                 <div class="text-center bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-amber-300 hover:shadow-lg transition duration-300">
                     <div class="feature-icon mx-auto mb-5"><i class="fas fa-phone-alt"></i></div>
                     <h3 class="text-xl font-bold text-gray-800 mb-3">Appelez-nous</h3>
                     <p class="text-gray-600 leading-relaxed">
-                        <a href="tel:+224626311915" class="hover:text-amber-600 transition font-medium">+224 626 311 915</a><br>
-                        <a href="tel:+224626314400" class="hover:text-amber-600 transition font-medium">+224 626 31 44 00</a>
+                        <a href="tel:+224626311915" class="hover:text-amber-600 transition font-medium"> +224 628403565</a><br>
                     </p>
                 </div>
                 <div class="text-center bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:border-amber-300 hover:shadow-lg transition duration-300">
@@ -1729,6 +1782,10 @@
                             </div>
                             ${countdownHTML}
                         </div>
+                    </div>
+                    <div style="font-size:10px;color:#92400e;background:#fef3c7;border:1px solid #fde68a;border-radius:6px;padding:4px 8px;margin:4px 0 6px;display:flex;align-items:center;gap:5px;line-height:1.3;">
+                        <i class="fas fa-tags" style="font-size:9px;color:#d97706;flex-shrink:0;"></i>
+                        <span><strong>Remise dès 5 pcs</strong> &nbsp;·&nbsp; −3% → −10% sur la quantité</span>
                     </div>
                     <div class="prod-btns">
                         <button class="prod-btn" onclick="event.stopPropagation();addToCartWithQty(${p.id})">
@@ -2245,41 +2302,58 @@
             }
         })();
 
-        /* ── Hero Carousel ── */
-        (function() {
-            const slides = document.querySelectorAll('.hero-slide');
-            const dots   = document.querySelectorAll('.hero-dot');
-            if (!slides.length) return;
 
-            let current = 0;
-            let timer   = null;
+    </script>
 
-            function goTo(n) {
-                slides[current].classList.remove('active');
-                slides[current].classList.add('exit');
-                dots[current]?.classList.remove('active');
+    <script id="hero-fix-js">
+    document.addEventListener("DOMContentLoaded", function () {
 
-                const old = current;
-                current = (n + slides.length) % slides.length;
+        const slides = document.querySelectorAll('.hero-slide');
+        const dots   = document.querySelectorAll('.hero-dot');
 
-                slides[current].classList.remove('exit');
-                slides[current].classList.add('active');
-                dots[current]?.classList.add('active');
+        if (!slides.length) return;
 
-                setTimeout(() => slides[old].classList.remove('exit'), 750);
-            }
+        let current = 0;
+        let timer   = null;
 
-            function startAuto() {
-                clearInterval(timer);
-                timer = setInterval(() => goTo(current + 1), 3500);
-            }
+        function goTo(n) {
+            slides[current].classList.remove('active');
+            slides[current].classList.add('exit');
+            dots[current]?.classList.remove('active');
 
-            document.getElementById('heroNext')?.addEventListener('click', () => { goTo(current + 1); startAuto(); });
-            document.getElementById('heroPrev')?.addEventListener('click', () => { goTo(current - 1); startAuto(); });
-            dots.forEach(d => d.addEventListener('click', () => { goTo(+d.dataset.dot); startAuto(); }));
+            const old = current;
+            current = (n + slides.length) % slides.length;
 
+            slides[current].classList.remove('exit');
+            slides[current].classList.add('active');
+            dots[current]?.classList.add('active');
+
+            setTimeout(() => slides[old].classList.remove('exit'), 750);
+        }
+
+        function startAuto() {
+            clearInterval(timer);
+            timer = setInterval(() => goTo(current + 1), 3500);
+        }
+
+        document.getElementById('heroNext')?.addEventListener('click', () => {
+            goTo(current + 1);
             startAuto();
-        })();
+        });
+
+        document.getElementById('heroPrev')?.addEventListener('click', () => {
+            goTo(current - 1);
+            startAuto();
+        });
+
+        dots.forEach(d => d.addEventListener('click', () => {
+            goTo(+d.dataset.dot);
+            startAuto();
+        }));
+
+        startAuto();
+
+    });
     </script>
 
     {{-- ── Global Search Script ── --}}

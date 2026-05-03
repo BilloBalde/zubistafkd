@@ -1,0 +1,1 @@
+sur le homepage quand on clique sur commander rediriger vers le checkout pour ce produit seulement

@@ -276,16 +276,21 @@
                     <div class="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-3">
                         <p class="text-xs font-semibold text-amber-800 mb-2.5 flex items-center gap-1.5">
                             <i class="fas fa-tags text-amber-500"></i>
-                            Tarifs de gros — prix unitaire selon la quantité
+                            Tarifs de gros — montant total selon la quantité
                         </p>
                         <div class="grid grid-cols-4 gap-1.5">
                             @foreach($bulkTiers as $tier)
-                            @php $tierPrice = (int) round($basePrice * (1 - $tier['discount'] / 100)); @endphp
+                            @php
+                                $minQty = (int) $tier['qty'];
+                                $unitAfterDiscount = (int) round($basePrice * (1 - $tier['discount'] / 100));
+                                $totalTierPrice = $unitAfterDiscount * $minQty;
+                            @endphp
                             <div class="flex flex-col items-center bg-white rounded-lg border border-amber-100 py-2 px-1 shadow-sm">
                                 <span class="text-[11px] font-bold text-amber-700">{{ $tier['qty'] }} pcs</span>
-                                <span class="text-[12px] font-bold text-gray-800 mt-0.5 leading-tight">
-                                    {{ number_format($tierPrice, 0, ',', ' ') }}
+                                <span class="text-[11px] font-bold text-gray-800 mt-0.5 leading-tight text-center">
+                                    {{ number_format($totalTierPrice, 0, ',', ' ') }}
                                 </span>
+                                <span class="text-[9px] text-gray-400 leading-tight">GNF total</span>
                                 <span class="text-[10px] text-white font-semibold bg-green-500 rounded-full px-1.5 mt-1">
                                     −{{ $tier['discount'] }}%
                                 </span>
@@ -314,6 +319,30 @@
                             </button>
                         </div>
                         <span id="qty-discount-badge" class="hidden text-xs font-bold text-white bg-green-500 px-2.5 py-1 rounded-full transition-all"></span>
+                    </div>
+
+                    {{-- Récapitulatif prix total --}}
+                    <div class="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 mb-4 space-y-1.5">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500 flex items-center gap-1.5">
+                                <i class="fas fa-tag text-amber-400 text-xs"></i> Prix unitaire
+                            </span>
+                            <span id="unit-price-display" class="font-semibold text-gray-700"></span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-500 flex items-center gap-1.5">
+                                <i class="fas fa-times text-amber-400 text-xs"></i> Quantité
+                            </span>
+                            <span id="qty-display" class="font-semibold text-gray-700">× 1</span>
+                        </div>
+                        <div class="border-t border-amber-200 pt-1.5 flex justify-between items-center">
+                            <span class="font-bold text-gray-800 text-sm">Total commande</span>
+                            <span id="total-price-display" class="font-extrabold text-xl text-amber-600"></span>
+                        </div>
+                        <div id="savings-row" class="hidden flex items-center gap-1.5 text-xs font-semibold text-green-600">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="savings-display"></span>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
@@ -389,6 +418,9 @@ const discountTiers = [
     { min: 5,  pct: 3  },
 ];
 
+const BASE_UNIT_PRICE = {{ (float)($product->promo_price ?? $product->price) }};
+const fmt = n => Math.round(n).toLocaleString('fr-FR');
+
 function getQty() {
     return Math.max(1, parseInt(document.getElementById('qty-input').value) || 1);
 }
@@ -396,22 +428,43 @@ function getQty() {
 function changeQty(delta) {
     const input = document.getElementById('qty-input');
     input.value = Math.max(1, (parseInt(input.value) || 1) + delta);
-    updateDiscountBadge();
+    updateDisplay();
 }
 
-function updateDiscountBadge() {
-    const qty   = getQty();
+function updateDisplay() {
+    const qty       = getQty();
+    const tier      = discountTiers.find(t => qty >= t.min);
+    const discPct   = tier ? tier.pct : 0;
+    const unitPrice = Math.round(BASE_UNIT_PRICE * (1 - discPct / 100));
+    const total     = unitPrice * qty;
+
+    /* Badge réduction */
     const badge = document.getElementById('qty-discount-badge');
-    const tier  = discountTiers.find(t => qty >= t.min);
-    if (tier) {
-        badge.textContent = '−' + tier.pct + '%';
+    if (discPct > 0) {
+        badge.textContent = '−' + discPct + '%';
         badge.classList.remove('hidden');
     } else {
         badge.classList.add('hidden');
     }
+
+    /* Récapitulatif */
+    document.getElementById('unit-price-display').textContent = fmt(unitPrice) + ' GNF';
+    document.getElementById('qty-display').textContent        = '× ' + qty;
+    document.getElementById('total-price-display').textContent = fmt(total) + ' GNF';
+
+    /* Économie */
+    const savingsRow = document.getElementById('savings-row');
+    if (discPct > 0) {
+        const saved = Math.round(BASE_UNIT_PRICE * qty) - total;
+        document.getElementById('savings-display').textContent = 'Vous économisez ' + fmt(saved) + ' GNF';
+        savingsRow.classList.remove('hidden');
+    } else {
+        savingsRow.classList.add('hidden');
+    }
 }
 
-document.getElementById('qty-input').addEventListener('input', updateDiscountBadge);
+document.getElementById('qty-input').addEventListener('input', updateDisplay);
+updateDisplay();
 
 function updateCartBadge(count) {
     document.querySelectorAll('#cart-count').forEach(el => {
